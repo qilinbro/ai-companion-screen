@@ -224,6 +224,7 @@ ai-companion-screen/
    ├─ 00-plan-and-acceptance.md             # 当前基线与验收入口
    ├─ 01-desktop-companion.md              # 本文
    ├─ 02-product-references.md             # 公开资料与借鉴边界
+   ├─ 03-frontend-tasks.md                 # 前端任务、依赖与验收
    ├─ third-party.md                       # 来源、许可证与实际用途
    ├─ archive/                            # 被替代的历史方案
    └─ acceptance/                         # 实测记录，待创建

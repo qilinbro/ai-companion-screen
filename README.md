@@ -12,6 +12,7 @@
 
 ## 阅读入口
 
+- [前端开发任务清单](docs/03-frontend-tasks.md)
 - [电脑客户端完整方案](docs/01-desktop-companion.md)
 - [当前开发基线与验收入口](docs/00-plan-and-acceptance.md)
 - [Muse / Dot 功能核实与借鉴边界](docs/02-product-references.md)
