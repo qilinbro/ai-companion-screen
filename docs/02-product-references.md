@@ -1,8 +1,31 @@
-# Muse / Dot 功能参考与核实边界
+# Muse / Dot / OpenAI Dots 功能参考与核实边界
 
-日期：2026-10-19（Asia/Shanghai）。用户已确认参考对象为 Meta Muse 与 New Computer Dot。本文件是公开资料核实和本项目设计推导，不是已实现功能列表，也不是对参考产品的实际使用评测。
+更新：2026-10-20（Asia/Shanghai）。2026-10-19 的 Meta Muse 与 New Computer Dot 参考保留在下文，属于早期历史。用户本轮提供了明确网址，确认希望参考 **OpenAI Dots**，范围为完整交互 Demo 加可用本地功能。本文件区分公开资料、本项目设计与实现状态，不是对参考产品的实测评价。
 
-## 1. Meta Muse
+本次对话最终已收敛为极简宠物、折叠输入及模型按需使用屏幕工具；需求演变、实现和未完成项见[对话总结](05-session-summary-2026-10-20.md)。下述产品资料与中途 Demo 场景不等于当前全部功能已开放。
+
+## 本轮确认：OpenAI Dots
+
+用户提供的 [OpenAI Dot 功能介绍](https://blog.csdn.net/aidoudoulong/article/details/166886570) 指向 OpenAI 的常驻代理 Dots，单个称 dot；它与下面的 New Computer Dot 是不同产品。博客用于确定用户所指产品，功能核对以官方文档为主。套餐、开放范围与客户端版本不照搬博客结论。
+
+- [官方概览](https://learn.chatgpt.com/docs/dots)：持续协作、研究与任务结果反馈。
+- [消息与渠道](https://learn.chatgpt.com/docs/dots/channels)：语音、ChatGPT、Slack 与 Teams；联系渠道和应用访问分别管理。
+- [任务与记忆](https://learn.chatgpt.com/docs/dots/tasks-and-memory)：后台代理、持续事项、活动与定时任务。
+- [电脑与应用](https://learn.chatgpt.com/docs/dots/computers-and-apps)：云电脑、本机接入、浏览器接管与连接的应用。
+- [控制](https://learn.chatgpt.com/docs/dots/controls)：查看结果、设置行动边界、暂停与停止。
+- [Space 中的代理](https://learn.chatgpt.com/docs/space/agents)：通过页面、评论或旁侧对话请求起草与修订。
+
+本轮中途曾把这些类别转成 10 个交互场景：翻译、报错、研究、持续跟进、电脑接管、多渠道、Space、语音、文件、日常协作，并制作过本地资料和示例面板。随后按用户要求简化为当前宠物、折叠输入和单画布，旧面板代码保留不代表当前默认入口仍开放这些功能。主屏 PNG 现在是真实工具，兼容模型链路已实现并通过受控测试；尚未使用用户实际模型服务验收效果。语音、终端和外部账户仍没有本轮真实接入。翻译和报错来自本项目需求，不是官方逐项功能清单。具体当前范围见[本轮 Demo](04-dot-demo.md)。
+
+本项目不使用 OpenAI Dots 品牌形象或官方角色；保留用户要求的本机原角色动画，正式构建使用原创回退。没有接入 Dots 服务、云电脑、账号或私有接口。
+
+### 主题研究与设计工具
+
+- [Radix Themes Color](https://www.radix-ui.com/themes/docs/theme/color)：参考中性色阶、文本对比与界面层次；没有安装 Radix 或复制其组件。
+- [Raycast Search Bar](https://manual.raycast.com/search-bar)：参考清晰的单一输入入口；不是复制 Raycast 的搜索功能或界面资产。
+- [UI UX Pro Max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill)：本轮已全局安装并使用本地设计查询，作为开发 Skill；按项目黑白暖灰宠物主题选择建议，不照搬落地页或默认蓝色方案。安装和许可证记录见 [第三方记录](third-party.md)。
+
+## 1. Meta Muse（早期参考）
 
 ### 已查到的官方说明
 
@@ -22,7 +45,7 @@
 
 不复制多聊天/目标/灵感常驻页面，不承诺并行处理很多任务，不默认建立云端常驻虚拟机、任意终端、支付、邮件或全应用控制。上述能力日后若引入，需独立设计、授权与验收。
 
-## 2. New Computer Dot
+## 2. New Computer Dot（历史参考，与 OpenAI Dots 不同）
 
 ### 已查到的官方说明
 
@@ -42,7 +65,7 @@
 
 这里的条目级来源、更新时间、删除后缓存失效和本地优先存储是本项目自己的具体要求，不能写成 Dot 拥有完全相同界面的事实。记忆效果需真实跨会话验收，不使用“无限、永不忘记”等承诺。
 
-## 3. 转化为伴屏自己的产品要求
+## 3. 早期转化为伴屏自己的产品要求
 
 Muse 提供目标持续推进的参考，Dot 提供个性化连续性的参考；本项目结合原始跨屏要求，把它们转为“可管理的背景 + 受限执行 + 克制的主动反馈 + 角色与单画布”。
 
@@ -57,4 +80,6 @@ Muse 提供目标持续推进的参考，Dot 提供个性化连续性的参考�
 
 ## 5. 来源与引入状态
 
-本轮仅阅读并链接公开资料，没有下载或引入产品代码、角色素材、模型权重、SDK 或连接器。没有声称获得 Muse、Dot 或联想品牌授权。实际依赖和素材引入时另在 third-party.md 记录精确版本、许可证、用途与分发方式。
+2026-10-19 的参考核实仅阅读并链接公开资料，没有引入这些参考产品的代码、角色、模型权重、SDK 或连接器。2026-10-20 新增 OpenAI Dots 公开资料引用与开发设计 Skill，具体引入记录见 [third-party.md](third-party.md)。没有声称取得 Muse、New Computer Dot、OpenAI Dots 或联想品牌授权；公开功能介绍不等于同等服务接口或素材使用许可。
+
+2026-10-20 本轮已执行类型与构建检查、Windows 源码/便携启动、原生拖动及受控屏幕/模型协议链路检查，动作联动另有受控前端验证；证据和未验收项见[Demo 验证状态](04-dot-demo.md#当前验证状态)。这些结果证明相应本地能力与协议流程，不是对 OpenAI Dots 服务、云电脑、外部应用或用户真实模型效果的验收。

@@ -1,0 +1,16 @@
+node_modules/
+dist/
+dist-electron/
+outputs/
+
+# Local-only third-party study placeholder; never commit or distribute.
+vendor/grok-study/
+NOTICE.local.md
+
+.env
+.env.*
+!.env.example
+
+*.log
+.DS_Store
+Thumbs.db

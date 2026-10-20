@@ -1,0 +1,111 @@
+:root {
+  color-scheme: light dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  background: transparent;
+  overflow: hidden;
+}
+
+body {
+  -webkit-app-region: drag;
+  user-select: none;
+  cursor: grab;
+}
+
+.stage {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+}
+
+.character {
+  display: block;
+  width: 96px;
+  height: 96px;
+  overflow: visible;
+  pointer-events: none;
+}
+
+/* Neutral original stand-in. Not the final character; FE-003 replaces it. */
+.character-original {
+  filter: drop-shadow(0 8px 14px rgba(20, 18, 14, 0.22));
+}
+
+.original-breathe {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: original-breathe 4.6s ease-in-out infinite;
+}
+
+.original-eyes {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: original-blink 6.2s infinite;
+}
+
+.original-eye-shape {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform 0.25s ease;
+}
+
+.character-thinking .original-eye-shape {
+  transform: scaleY(0.32);
+}
+
+.character-feedback .original-eye-shape {
+  transform: translateY(-1.5px) scaleY(0.55);
+}
+
+.original-mouth {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.character-feedback .original-mouth {
+  opacity: 1;
+}
+
+@keyframes original-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.035);
+  }
+}
+
+@keyframes original-blink {
+  0%,
+  92%,
+  100% {
+    transform: scaleY(1);
+  }
+  95% {
+    transform: scaleY(0.08);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .original-breathe,
+  .original-eyes {
+    animation: none;
+  }
+}
+
+body[data-paused='true'] .original-breathe,
+body[data-paused='true'] .original-eyes {
+  animation-play-state: paused;
+}
