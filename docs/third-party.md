@@ -1,6 +1,6 @@
 # 第三方来源与使用记录
 
-更新：2026-10-20。当前为 Windows 模型对话 Demo：原角色、折叠输入、窄边框流式画布及由模型选择的主屏工具。用户自行配置兼容服务，项目不附带服务密钥或模型权重。
+更新：2026-10-21。当前为 v0.2 Windows 桌面伙伴，新增同机画布显示器选择、全屏和模型连接检测。用户自行配置兼容服务，项目不附带服务密钥或模型权重。本轮未新增运行依赖。
 
 ## 依赖与平台
 
@@ -23,12 +23,17 @@
 - [assistant-ui](https://github.com/assistant-ui/assistant-ui)，[MIT](https://github.com/assistant-ui/assistant-ui/blob/main/LICENSE)：参考 [Dot Matrix](https://www.assistant-ui.com/design/components/dot-matrix) 的单色状态动效、减弱动画和状态语义。
 - [Vercel AI Elements](https://github.com/vercel/ai-elements)，[Apache-2.0](https://github.com/vercel/ai-elements/blob/main/LICENSE)：参考 [Shimmer](https://elements.ai-sdk.dev/components/shimmer) 的轻微等待节奏，不复制具体实现。
 - 已安装的 [UI UX Pro Max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill)，MIT，本机位置 `~/.agents/skills/ui-ux-pro-max`：聚焦查询 AI streaming/loading，采用真实状态反馈和流式呈现建议；此前 CLI helper 下载未完成，已安装本地文件用于查询。web-motion-design 用于 CSS 透明度、动效时长等开发建议。技能不加入应用包。
+- v0.2 使用本机 Impeccable 的界面完善流程和 Vercel React 性能建议；这些开发技能不作为应用运行依赖，也不进入便携包。回复排版使用 React 文本节点实现受限 Markdown，不引入 HTML 渲染或第三方聊天库。
 
 [Radix 色阶](https://www.radix-ui.com/themes/docs/theme/color)、[Raycast 输入入口](https://manual.raycast.com/search-bar) 及[历史产品研究](02-product-references.md)保留为早期参考，不表示软件或云服务已经接入。本项目不连接 OpenAI Dots、ChatGPT Work、Codex 或 Space 云服务。
 
 官方技术依据：[Electron 安全指南](https://www.electronjs.org/docs/latest/tutorial/security)、[桌面捕获](https://www.electronjs.org/docs/latest/api/desktop-capturer)、[safeStorage](https://www.electronjs.org/docs/latest/api/safe-storage)、[全局快捷键](https://www.electronjs.org/docs/latest/api/global-shortcut)。
 
+窗口依据：[BrowserWindow 全屏与窗口接口](https://www.electronjs.org/docs/latest/api/browser-window)、[窗口样式及透明窗口限制](https://www.electronjs.org/docs/latest/tutorial/custom-window-styles)。实际平台表现以本轮 Windows 证据为准。
+
 ## 验证与分发
+
+v0.2 本轮结果以 [实现与验收记录](06-v0.2-implementation.md)为准。下述为上轮历史记录。
 
 本轮完整构建通过（生产渲染 27 个模块）、23 项运行时夹具通过，静态设计检查未报项。受控本地 SSE 服务的 Windows 原生 UI 链路已验证两次请求、工具请求、图片接收与 PNG 有效性。该测试夹具不做真实模型推理，不是识图或分析质量证据；新版便携验证状态见 [当前验证状态](04-dot-demo.md#当前验证状态)。便携包保留 Electron 与白名单依赖许可证，不含安装器或代码签名。
 

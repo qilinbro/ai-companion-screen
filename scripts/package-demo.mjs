@@ -34,6 +34,8 @@ try {
     throw new Error('缺少 dist-electron/main.js，请先运行 npm run build。');
   }
   const modules = moduleNames.map((name) => collectRuntimeModule(name));
+  const acceptanceNotes = fs.readFileSync(path.join(root, 'docs', '06-v0.2-implementation.md'), 'utf8');
+  const publicReadme = fs.readFileSync(path.join(root, 'README-PUBLIC-WINDOWS.txt'), 'utf8');
   assertSafeOutput();
   if (fs.existsSync(outputDir)) fs.rmSync(outputDir, { recursive: true, force: true });
   fs.mkdirSync(outputDir, { recursive: true });
@@ -56,7 +58,8 @@ try {
     main: 'apps/desktop/dist-electron/main.js',
     dependencies: Object.fromEntries(modules.map((module) => [module.name, module.version])),
   }, null, 2) + '\n');
-  fs.copyFileSync(path.join(root, 'README-WINDOWS.txt'), path.join(outputDir, 'README-WINDOWS.txt'));
+  fs.writeFileSync(path.join(outputDir, 'README-WINDOWS.txt'), publicReadme);
+  fs.writeFileSync(path.join(outputDir, 'v0.2-实现与验收.md'), acceptanceNotes);
   fs.renameSync(path.join(outputDir, 'electron.exe'), path.join(outputDir, '伴屏 Demo.exe'));
 
   console.log(`[desktop:package] 已生成便携目录：${outputDir}`);

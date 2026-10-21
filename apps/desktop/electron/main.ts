@@ -10,6 +10,7 @@ import {
   Menu,
   nativeImage,
   Notification,
+  powerMonitor,
   screen,
   Tray,
   type IpcMainInvokeEvent,
@@ -17,20 +18,52 @@ import {
 } from 'electron';
 import { cancelScreenCapture, capturePrimaryScreen, validateCaptureRequestId } from './screen-capture';
 import { ModelConfigStore } from './model-config';
-import { AgentRuntime } from './agent-runtime';
+import { AgentRuntime, checkModelConnection } from './agent-runtime';
+import { WindowLayout, clampBounds, fitCanvasBounds, type DisplayInfo, type DisplayState, type WindowMode } from './window-layout';
 
-type WindowMode = 'idle' | 'input' | 'canvas';
 
 const DEV_ENTRY = 'http://127.0.0.1:5173/character.html';
-const PAGE_PATH = path.join(__dirname, '..', 'dist', 'character.html');
+function readLocalDesktopWorkspace(): { workspaceRoot: string; characterAssetRoot: string } | null {
+  if (!app.isPackaged) return null;
+  const marker = path.join(app.getAppPath(), 'local-desktop.json');
+  if (!fs.existsSync(marker)) return null;
+  const metadata = fs.lstatSync(marker);
+  if (!metadata.isFile() || metadata.isSymbolicLink() || metadata.size > 16384) throw new Error('本机桌面配置无效。');
+  const data: unknown = JSON.parse(fs.readFileSync(marker, 'utf8'));
+  if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('本机桌面配置无效。');
+  const item = data as Record<string, unknown>;
+  if (item.kind !== 'banping-local-desktop' || item.version !== 1 || typeof item.workspaceRoot !== 'string' || typeof item.characterAssetRoot !== 'string'
+    || !path.isAbsolute(item.workspaceRoot) || !path.isAbsolute(item.characterAssetRoot)
+    || Object.keys(item).some((key) => !['kind', 'version', 'workspaceRoot', 'characterAssetRoot'].includes(key))) throw new Error('本机桌面配置无效。');
+  const workspace = fs.realpathSync(item.workspaceRoot);
+  if (!fs.statSync(workspace).isDirectory()) throw new Error('原角色工作目录不存在。');
+  const assetRoot = fs.realpathSync(item.characterAssetRoot);
+  const relative = path.relative(workspace, assetRoot);
+  if (!relative || relative === '..' || relative.startsWith(`..${path.sep}`) || path.isAbsolute(relative) || !fs.statSync(assetRoot).isDirectory()) throw new Error('原角色目录不在本机工作区内。');
+  return { workspaceRoot: workspace, characterAssetRoot: assetRoot };
+}
+const localDesktop = readLocalDesktopWorkspace();
+const localCharacter = Boolean(localDesktop) || (!app.isPackaged && process.env.COMPANION_LOCAL_CHARACTER === '1');
+// The source local entry already has a relative asset path. Only an explicitly
+// deployed local desktop resolves an external path through this trusted marker.
+const characterAssetRoot = localDesktop?.characterAssetRoot ?? null;
+const PAGE_PATH = path.join(__dirname, '..', localCharacter ? 'dist-local' : 'dist', 'character.html');
 const FILE_ENTRY = pathToFileURL(PAGE_PATH).href;
 const CHARACTER_STATES = new Set(['idle', 'curious', 'thinking', 'feedback']);
 const WAKE_SHORTCUT = 'Control+Alt+Space';
 let mainWindow: BrowserWindow | null = null;
 let tray: Tray | null = null;
 let currentMode: WindowMode = 'idle';
-let compactWindowBounds: Rectangle | null = null;
-let petDrag: { cursor: Electron.Point; bounds: Rectangle; compact: Rectangle } | null = null;
+let layout: WindowLayout | null = null;
+let petDrag: { cursor: Electron.Point; bounds: Rectangle; petAnchor: Rectangle; mode: WindowMode } | null = null;
+let fullscreenDisplayId: number | null = null;
+let fullscreenBounds: Rectangle | null = null;
+let fullscreenLayer = false;
+let presentationVisible = true;
+let captureOperations = 0;
+let connectionTest: AbortController | null = null;
+let systemSleeping = false;
+let screenLocked = false;
 let quitting = false;
 let windowPresentationRevision = 0;
 let modelConfig: ModelConfigStore | null = null;
@@ -43,7 +76,7 @@ const reminderAttempts = new Map<string, number>();
 const liveReminders = new Map<string, Notification>();
 
 app.setName('Companion Screen Demo');
-const userDataDir = process.env.COMPANION_USER_DATA_DIR;
+const userDataDir = process.env.COMPANION_USER_DATA_DIR ?? (localDesktop ? path.join(localDesktop.workspaceRoot, 'outputs/local-study-profile') : undefined);
 if (userDataDir) {
   const resolved = path.resolve(userDataDir);
   fs.mkdirSync(resolved, { recursive: true });
@@ -80,54 +113,124 @@ function assertTrustedSender(event: IpcMainInvokeEvent): BrowserWindow {
   return win;
 }
 
-function fitBounds(mode: WindowMode, previous?: Rectangle): Rectangle {
-  const display = previous
-    ? screen.getDisplayMatching(previous)
-    : screen.getPrimaryDisplay();
-  const area = display.workArea;
-  const margin = Math.min(20, Math.floor(Math.min(area.width, area.height) / 20));
-  const availableWidth = Math.max(1, area.width - margin * 2);
-  const width = Math.min(mode === 'idle' ? 180 : mode === 'input' ? 380 : 880, availableWidth);
-  const height = Math.min(mode === 'idle' ? 180 : mode === 'input' ? 300 : 680, Math.max(1, area.height - margin * 2));
-  // Keep the pet at the same bottom-center point when its input unfolds upward.
-  // The initial position leaves enough room for the wider input near the edge.
-  const anchorX = previous
-    ? previous.x + previous.width / 2
-    : area.x + area.width - margin - Math.min(380, availableWidth) / 2;
-  const anchorBottom = previous ? previous.y + previous.height : area.y + area.height - margin;
-  const x = anchorX - width / 2;
-  const y = anchorBottom - height;
-  return {
-    x: Math.round(Math.min(Math.max(x, area.x), area.x + area.width - width)),
-    y: Math.round(Math.min(Math.max(y, area.y), area.y + area.height - height)),
-    width,
-    height,
-  };
+function getDisplays(): DisplayInfo[] {
+  const primary = screen.getPrimaryDisplay().id;
+  return screen.getAllDisplays().map((display, index) => ({
+    id: display.id,
+    label: display.label || `显示器 ${index + 1}`,
+    isPrimary: display.id === primary,
+    scaleFactor: display.scaleFactor,
+    bounds: { ...display.bounds },
+    workArea: { ...display.workArea },
+  }));
+}
+
+function getLayout(): WindowLayout {
+  layout ??= new WindowLayout(getDisplays());
+  return layout;
+}
+
+function displayState(): DisplayState { return getLayout().snapshot(getDisplays()); }
+
+function publishDisplayState(): void {
+  const win = mainWindow;
+  if (win && !win.isDestroyed() && isTrustedPage(win.webContents.getURL())) win.webContents.send('companion:display-state', displayState());
+}
+
+function setBoundsIfChanged(win: BrowserWindow, bounds: Rectangle): void {
+  const current = win.getBounds();
+  if (current.x !== bounds.x || current.y !== bounds.y || current.width !== bounds.width || current.height !== bounds.height) win.setBounds(bounds);
+}
+
+function applyWindowLayout(): void {
+  const win = mainWindow;
+  if (!win || win.isDestroyed()) return;
+  const state = getLayout();
+  const displays = getDisplays();
+  state.reconcile(displays);
+  const target = state.canvasDisplay(displays);
+  if (state.mode === 'canvas' && state.fullscreen) {
+    const changedBounds = !fullscreenBounds || Object.keys(target.bounds).some((key) => target.bounds[key as keyof Rectangle] !== fullscreenBounds![key as keyof Rectangle]);
+    if (fullscreenDisplayId !== target.id || changedBounds) {
+      if (fullscreenDisplayId !== null) win.setFullScreen(false);
+      // Electron 44's transparent Windows windows implement setFullScreen by
+      // setting monitor bounds, while isFullScreen() remains false. Keep one
+      // renderer, track this presentation explicitly and include the taskbar
+      // area. Never use that native flag as the transition guard here.
+      setBoundsIfChanged(win, fitCanvasBounds(target));
+      fullscreenDisplayId = target.id;
+      fullscreenBounds = { ...target.bounds };
+      win.setFullScreen(true);
+      setBoundsIfChanged(win, target.bounds);
+    }
+  } else {
+    const wasFullscreen = fullscreenDisplayId !== null || win.isFullScreen();
+    fullscreenDisplayId = null;
+    fullscreenBounds = null;
+    if (wasFullscreen) win.setFullScreen(false);
+    setBoundsIfChanged(win, state.getBounds(displays));
+  }
+  // Normal floating windows sit below the Windows taskbar. Fullscreen needs
+  // the supported screen-saver level to cover that selected display entirely.
+  if (fullscreenLayer !== state.fullscreen || !win.isAlwaysOnTop()) {
+    win.setAlwaysOnTop(true, state.fullscreen ? 'screen-saver' : 'floating');
+    fullscreenLayer = state.fullscreen;
+  }
+  publishDisplayState();
+}
+
+function cancelConnectionTest(): void {
+  connectionTest?.abort(new Error('连接检测已取消。'));
+  connectionTest = null;
+}
+
+function stopDesktopWork(): void {
+  petDrag = null;
+  agentRuntime?.cancel();
+  cancelConnectionTest();
+  cancelScreenCapture();
+}
+
+async function captureForWindow(requestId: string): Promise<Awaited<ReturnType<typeof capturePrimaryScreen>>> {
+  const win = mainWindow;
+  if (!win || win.isDestroyed() || quitting) throw new Error('桌面窗口已关闭。');
+  if (systemSleeping || screenLocked) throw new Error('电脑已休眠或锁定，请解锁后重新发送。');
+  if (modelConfigWrites || connectionTest) throw new Error('模型设置正在更新或检测，请稍后重试。');
+  if (!modelConfig?.getPublic().allowScreen) throw new Error('尚未允许模型查看主屏幕。请在设置中授权后重试。');
+  const revision = windowPresentationRevision;
+  captureOperations += 1;
+  try {
+    // Output placement never selects the capture source: this function always
+    // calls the dedicated primary-display capture implementation.
+    const captured = await capturePrimaryScreen({ requestId, window: win, mayRestore: () => mainWindow === win && !quitting && !systemSleeping && !screenLocked && presentationVisible && revision === windowPresentationRevision });
+    if (!modelConfig?.getPublic().allowScreen || systemSleeping || screenLocked || quitting) throw new Error('屏幕读取已取消，请重新授权后发送。');
+    return captured;
+  } finally {
+    captureOperations -= 1;
+    if (!captureOperations && mainWindow === win && !win.isDestroyed() && !quitting && !systemSleeping && !screenLocked && presentationVisible && !win.isVisible()) win.showInactive();
+  }
 }
 
 function setMode(mode: WindowMode, reveal = true): void {
   const win = mainWindow;
   if (!win || win.isDestroyed()) return;
-  windowPresentationRevision += 1;
-  cancelScreenCapture();
-  const previous = win.getBounds();
+  const state = getLayout();
+  state.rememberCanvas(win.getBounds(), getDisplays());
   petDrag = null;
-  // Keep the logical pet anchor when an unfolded input must fit near an edge.
-  // Only a user drag changes that anchor, not the temporary layout clamp.
-  compactWindowBounds ??= previous;
-  const anchorBounds = currentMode === 'canvas' && mode === 'canvas' ? previous : compactWindowBounds;
   currentMode = mode;
-  win.setResizable(false);
-  win.setBounds(fitBounds(mode, anchorBounds));
-  win.setAlwaysOnTop(true);
-  win.setSkipTaskbar(true);
+  state.setMode(mode);
+  applyWindowLayout();
   win.webContents.send('companion:mode', mode);
   if (reveal) {
+    presentationVisible = true;
+    // A capture may temporarily hide the window. Reposition it immediately,
+    // then reveal after pixels arrive so moving the canvas cannot cancel work.
+    if (captureOperations || systemSleeping || screenLocked) return;
     if (win.isMinimized()) win.restore();
-    if (mode === 'idle') win.showInactive();
+    if (mode === 'idle') { if (!win.isVisible()) win.showInactive(); }
     else {
-      win.show();
-      win.focus();
+      if (!win.isVisible()) win.show();
+      if (!win.isFocused()) win.focus();
     }
   }
 }
@@ -226,10 +329,14 @@ function notifyReminder(payload: unknown): Promise<{ shown: boolean }> {
 }
 
 function registerIpc(): void {
+  ipcMain.handle('companion:get-character-asset-base', (event) => {
+    assertTrustedSender(event);
+    return characterAssetRoot ? pathToFileURL(characterAssetRoot + path.sep).href : null;
+  });
   ipcMain.handle('companion:drag-window', (event, phase: unknown, origin: unknown) => {
     const win = assertTrustedSender(event);
     if (phase !== 'start' && phase !== 'move' && phase !== 'end') throw new TypeError('未知拖动动作。');
-    if (phase === 'end' || quitting || !win.isVisible() || win.isMinimized()) { petDrag = null; return; }
+    if (phase === 'end' || quitting || getLayout().fullscreen || !win.isVisible() || win.isMinimized()) { petDrag = null; return; }
     if (phase === 'start') {
       const bounds = win.getBounds();
       petDrag = null;
@@ -240,17 +347,48 @@ function registerIpc(): void {
       // Preserve the actual pointer-down point even if IPC arrives after a fast
       // release. Local CSS coordinates become DIP here; later cursor reads are
       // main-process DIP, including across Windows display scaling changes.
-      petDrag = { cursor: { x: bounds.x + x * zoom, y: bounds.y + y * zoom }, bounds, compact: currentMode === 'canvas' ? compactWindowBounds ?? bounds : bounds };
+      petDrag = { cursor: { x: bounds.x + x * zoom, y: bounds.y + y * zoom }, bounds, petAnchor: { ...getLayout().petBounds }, mode: currentMode };
       return;
     }
     if (!petDrag) return;
     const cursor = screen.getCursorScreenPoint();
-    const area = screen.getDisplayNearestPoint(cursor).workArea;
-    const { bounds, compact } = petDrag;
-    const x = Math.round(Math.max(area.x, Math.min(bounds.x + cursor.x - petDrag.cursor.x, area.x + area.width - bounds.width)));
-    const y = Math.round(Math.max(area.y, Math.min(bounds.y + cursor.y - petDrag.cursor.y, area.y + area.height - bounds.height)));
-    win.setPosition(x, y);
-    compactWindowBounds = { ...compact, x: compact.x + x - bounds.x, y: compact.y + y - bounds.y };
+    const displayId = screen.getDisplayNearestPoint(cursor).id;
+    const display = getDisplays().find((item) => item.id === displayId)!;
+    const { bounds, petAnchor, mode } = petDrag;
+    const next = clampBounds({ ...bounds, x: bounds.x + cursor.x - petDrag.cursor.x, y: bounds.y + cursor.y - petDrag.cursor.y }, display.workArea);
+    win.setBounds(next);
+    if (mode === 'canvas') {
+      getLayout().moveCanvas(next, display);
+      publishDisplayState();
+    } else {
+      getLayout().petBounds = clampBounds({ ...petAnchor, x: petAnchor.x + next.x - bounds.x, y: petAnchor.y + next.y - bounds.y }, display.workArea);
+    }
+  });
+  ipcMain.handle('companion:get-display-state', (event) => {
+    assertTrustedSender(event);
+    return displayState();
+  });
+  ipcMain.handle('companion:set-canvas-display', (event, displayId: unknown) => {
+    const win = assertTrustedSender(event);
+    if (typeof displayId !== 'number' || !Number.isInteger(displayId)) throw new TypeError('显示器编号无效。');
+    const state = getLayout();
+    state.rememberCanvas(win.getBounds(), getDisplays());
+    state.selectDisplay(displayId, getDisplays());
+    petDrag = null;
+    if (currentMode === 'canvas') applyWindowLayout();
+    else publishDisplayState();
+    return displayState();
+  });
+  ipcMain.handle('companion:set-canvas-fullscreen', (event, value: unknown) => {
+    const win = assertTrustedSender(event);
+    if (typeof value !== 'boolean') throw new TypeError('全屏状态必须是布尔值。');
+    const state = getLayout();
+    state.rememberCanvas(win.getBounds(), getDisplays());
+    if (value && currentMode !== 'canvas') setMode('canvas');
+    state.fullscreen = value;
+    petDrag = null;
+    applyWindowLayout();
+    return displayState();
   });
   ipcMain.handle('companion:get-mode', (event) => {
     assertTrustedSender(event);
@@ -264,8 +402,9 @@ function registerIpc(): void {
   ipcMain.handle('companion:hide', (event) => {
     const win = assertTrustedSender(event);
     windowPresentationRevision += 1;
-    cancelScreenCapture();
-    petDrag = null;
+    presentationVisible = false;
+    stopDesktopWork();
+    setMode('idle', false);
     win.hide();
   });
   ipcMain.handle('companion:quit', (event) => {
@@ -277,11 +416,10 @@ function registerIpc(): void {
     return notifyReminder(payload);
   });
   ipcMain.handle('companion:capture-screen', (event, payload: unknown) => {
-    const win = assertTrustedSender(event);
+    assertTrustedSender(event);
     if (!payload || typeof payload !== 'object' || Array.isArray(payload)) throw new TypeError('截图请求必须是对象。');
     const requestId = validateCaptureRequestId((payload as Record<string, unknown>).requestId);
-    const revision = windowPresentationRevision;
-    return capturePrimaryScreen({ requestId, window: win, mayRestore: () => mainWindow === win && !quitting && revision === windowPresentationRevision });
+    return captureForWindow(requestId);
   });
   ipcMain.handle('companion:cancel-screen-capture', (event, requestId: unknown) => {
     assertTrustedSender(event);
@@ -296,7 +434,9 @@ function registerIpc(): void {
     assertTrustedSender(event);
     if (!modelConfig) throw new Error('模型设置还未就绪。');
     modelConfigWrites += 1;
+    cancelConnectionTest();
     agentRuntime?.cancel();
+    cancelScreenCapture();
     try {
       const previous = modelConfig.getPublic();
       const saved = await modelConfig.save(payload);
@@ -308,15 +448,36 @@ function registerIpc(): void {
     assertTrustedSender(event);
     if (!modelConfig) throw new Error('模型设置还未就绪。');
     modelConfigWrites += 1;
+    cancelConnectionTest();
     agentRuntime?.cancel();
+    cancelScreenCapture();
     try { return await modelConfig.clearSecret(); }
     finally { modelConfigWrites -= 1; }
   });
   ipcMain.handle('companion:run-agent', (event, payload: unknown) => {
     assertTrustedSender(event);
     if (!agentRuntime) throw new Error('模型服务还未就绪。');
+    if (systemSleeping || screenLocked) throw new Error('电脑已休眠或锁定，请解锁后重新发送。');
     if (modelConfigWrites > 0) throw new Error('正在保存模型设置，请稍后再发送。');
+    if (connectionTest) throw new Error('正在检测模型连接，请稍后再发送。');
     agentRuntime.start(payload);
+  });
+  ipcMain.handle('companion:test-model-connection', async (event, payload: unknown) => {
+    assertTrustedSender(event);
+    if (!modelConfig) throw new Error('模型设置还未就绪。');
+    if (systemSleeping || screenLocked) throw new Error('电脑已休眠或锁定，请解锁后重新检测。');
+    if (modelConfigWrites > 0) throw new Error('正在保存模型设置，请稍后检测。');
+    cancelConnectionTest();
+    agentRuntime?.cancel();
+    cancelScreenCapture();
+    const controller = new AbortController();
+    connectionTest = controller;
+    try {
+      const config = modelConfig.resolveForConnectionTest(payload);
+      return await checkModelConnection(config, { signal: controller.signal });
+    } finally {
+      if (connectionTest === controller) connectionTest = null;
+    }
   });
   ipcMain.handle('companion:cancel-agent', (event, requestId: unknown) => {
     assertTrustedSender(event);
@@ -325,15 +486,15 @@ function registerIpc(): void {
   ipcMain.handle('companion:set-always-on-top', (event, value: unknown) => {
     const win = assertTrustedSender(event);
     if (typeof value !== 'boolean') throw new Error('置顶状态必须是布尔值。');
-    // This pet demo remains visible above other windows in both modes.
-    win.setAlwaysOnTop(true);
+    // Keep the selected presentation's taskbar policy for the legacy toggle.
+    win.setAlwaysOnTop(true, getLayout().fullscreen ? 'screen-saver' : 'floating');
     return win.isAlwaysOnTop();
   });
 }
 
 function createWindow(): void {
   const win = new BrowserWindow({
-    ...fitBounds(currentMode),
+    ...getLayout().getBounds(getDisplays()),
     title: '伴屏 · 演示版',
     transparent: true,
     frame: false,
@@ -361,13 +522,22 @@ function createWindow(): void {
     if (quitting) return;
     event.preventDefault();
     windowPresentationRevision += 1;
-    cancelScreenCapture();
+    presentationVisible = false;
+    stopDesktopWork();
+    setMode('idle', false);
     win.hide();
   });
   win.on('blur', () => { petDrag = null; });
-  win.on('closed', () => { petDrag = null; agentRuntime?.cancel(); cancelScreenCapture(); mainWindow = null; });
-  win.webContents.on('did-start-navigation', () => { petDrag = null; agentRuntime?.cancel(); cancelScreenCapture(); });
-  win.webContents.on('render-process-gone', () => { petDrag = null; agentRuntime?.cancel(); cancelScreenCapture(); });
+  win.on('closed', () => { stopDesktopWork(); mainWindow = null; });
+  win.on('enter-full-screen', publishDisplayState);
+  win.on('leave-full-screen', () => {
+    // Some platforms finish the transition after setFullScreen(false) returns.
+    // Apply the saved normal bounds again once the native transition finishes.
+    if (!getLayout().fullscreen && !win.isDestroyed()) setBoundsIfChanged(win, getLayout().getBounds(getDisplays()));
+    publishDisplayState();
+  });
+  win.webContents.on('did-start-navigation', stopDesktopWork);
+  win.webContents.on('render-process-gone', stopDesktopWork);
   win.webContents.on('will-prevent-unload', (event) => {
     if (!quitting) return;
     // A hidden feature panel can still contain the draft that blocked quitting.
@@ -403,6 +573,13 @@ function createWindow(): void {
   });
   win.webContents.on('before-input-event', (event, input) => {
     if (input.type !== 'keyDown') return;
+    if (input.key === 'Escape' && getLayout().fullscreen) {
+      event.preventDefault();
+      getLayout().fullscreen = false;
+      petDrag = null;
+      applyWindowLayout();
+      return;
+    }
     if ((input.control || input.meta) && input.key.toLowerCase() === 'q') {
       event.preventDefault();
       app.quit();
@@ -434,7 +611,7 @@ if (!app.requestSingleInstanceLock()) {
   app.quit();
 } else {
   app.on('second-instance', () => setMode('input'));
-  app.on('before-quit', () => { quitting = true; windowPresentationRevision += 1; agentRuntime?.cancel(); cancelScreenCapture(); });
+  app.on('before-quit', () => { quitting = true; presentationVisible = false; windowPresentationRevision += 1; stopDesktopWork(); });
   app.on('will-quit', () => {
     if (app.isReady()) globalShortcut.unregisterAll();
     tray?.destroy();
@@ -452,10 +629,8 @@ if (!app.requestSingleInstanceLock()) {
         return modelConfig.getRuntime();
       },
       capture: async (requestId, signal) => {
-        const win = mainWindow;
-        if (!win || win.isDestroyed() || signal.aborted) throw new Error('截图已取消。');
-        const revision = windowPresentationRevision;
-        return capturePrimaryScreen({ requestId, window: win, mayRestore: () => mainWindow === win && !quitting && revision === windowPresentationRevision });
+        if (signal.aborted) throw new Error('截图已取消。');
+        return captureForWindow(requestId);
       },
       cancelCapture: cancelScreenCapture,
       emit: (event) => {
@@ -476,10 +651,31 @@ if (!app.requestSingleInstanceLock()) {
     app.on('activate', () => setMode('input'));
     const restoreVisibleBounds = (): void => {
       const win = mainWindow;
-      if (win && !win.isDestroyed()) win.setBounds(fitBounds(currentMode, win.getBounds()));
+      if (win && !win.isDestroyed()) {
+        petDrag = null;
+        applyWindowLayout();
+      }
     };
+    screen.on('display-added', restoreVisibleBounds);
     screen.on('display-removed', restoreVisibleBounds);
     screen.on('display-metrics-changed', restoreVisibleBounds);
+    powerMonitor.on('suspend', () => {
+      systemSleeping = true;
+      windowPresentationRevision += 1;
+      stopDesktopWork();
+    });
+    powerMonitor.on('lock-screen', () => {
+      screenLocked = true;
+      windowPresentationRevision += 1;
+      stopDesktopWork();
+    });
+    const resumeWindow = (): void => {
+      restoreVisibleBounds();
+      const win = mainWindow;
+      if (win && !win.isDestroyed() && !systemSleeping && !screenLocked && presentationVisible && !captureOperations) win.showInactive();
+    };
+    powerMonitor.on('resume', () => { systemSleeping = false; resumeWindow(); });
+    powerMonitor.on('unlock-screen', () => { screenLocked = false; resumeWindow(); });
   }).catch((error: unknown) => {
     console.error('[companion] 桌面初始化失败。', error);
     app.quit();

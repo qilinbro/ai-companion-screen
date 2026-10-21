@@ -1,13 +1,39 @@
 import { contextBridge, ipcRenderer } from 'electron';
 import type { ScreenCaptureResult } from './screen-capture';
 import type { PublicModelConfig, SaveModelConfigInput } from './model-config';
-import type { AgentEvent } from './agent-runtime';
+import type { AgentEvent, ModelConnectionResult } from './agent-runtime';
+import type { DisplayState } from './window-layout';
 
 type WindowMode = 'idle' | 'input' | 'canvas';
 
 contextBridge.exposeInMainWorld('companion', Object.freeze({
   version: 1,
+  getCharacterAssetBase: (): Promise<string | null> => ipcRenderer.invoke('companion:get-character-asset-base'),
   setMode: (mode: WindowMode): Promise<void> => ipcRenderer.invoke('companion:set-mode', mode),
+  getDisplayState: (): Promise<DisplayState> => ipcRenderer.invoke('companion:get-display-state'),
+  setCanvasDisplay: (displayId: number): Promise<DisplayState> => ipcRenderer.invoke('companion:set-canvas-display', displayId),
+  setCanvasFullscreen: (value: boolean): Promise<DisplayState> => ipcRenderer.invoke('companion:set-canvas-fullscreen', value),
+  onDisplayState: (listener: (state: DisplayState) => void): (() => void) => {
+    if (typeof listener !== 'function') throw new TypeError('显示器监听器必须是函数。');
+    let active = true;
+    let receivedEvent = false;
+    const validState = (value: unknown): value is DisplayState => {
+      if (!value || typeof value !== 'object') return false;
+      const state = value as Record<string, unknown>;
+      return Array.isArray(state.displays) && typeof state.canvasDisplayId === 'number'
+        && typeof state.fullscreen === 'boolean' && ['idle', 'input', 'canvas'].includes(String(state.mode));
+    };
+    const handler = (_event: Electron.IpcRendererEvent, value: unknown): void => {
+      if (!active || !validState(value)) return;
+      receivedEvent = true;
+      listener(value);
+    };
+    ipcRenderer.on('companion:display-state', handler);
+    void ipcRenderer.invoke('companion:get-display-state').then((value: unknown) => {
+      if (active && !receivedEvent && validState(value)) listener(value);
+    }).catch(() => undefined);
+    return () => { active = false; ipcRenderer.removeListener('companion:display-state', handler); };
+  },
   dragWindow: (phase: 'start' | 'move' | 'end', origin?: { x: number; y: number }): Promise<void> => ipcRenderer.invoke('companion:drag-window', phase, origin),
   hide: (): Promise<void> => ipcRenderer.invoke('companion:hide'),
   quit: (): Promise<void> => ipcRenderer.invoke('companion:quit'),
@@ -16,6 +42,7 @@ contextBridge.exposeInMainWorld('companion', Object.freeze({
   cancelScreenCapture: (requestId: string): Promise<void> => ipcRenderer.invoke('companion:cancel-screen-capture', requestId),
   getModelConfig: (): Promise<PublicModelConfig> => ipcRenderer.invoke('companion:get-model-config'),
   saveModelConfig: (input: SaveModelConfigInput): Promise<PublicModelConfig> => ipcRenderer.invoke('companion:save-model-config', input),
+  testModelConnection: (input: SaveModelConfigInput): Promise<ModelConnectionResult> => ipcRenderer.invoke('companion:test-model-connection', input),
   clearModelSecret: (): Promise<PublicModelConfig> => ipcRenderer.invoke('companion:clear-model-secret'),
   runAgent: (request: { requestId: string; prompt: string; conversationId?: string }): Promise<void> => ipcRenderer.invoke('companion:run-agent', request),
   cancelAgent: (requestId: string): Promise<void> => ipcRenderer.invoke('companion:cancel-agent', requestId),

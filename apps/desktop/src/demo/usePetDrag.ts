@@ -26,7 +26,11 @@ export function usePetDrag(mode: string) {
     dragging,
     shouldClick: () => Date.now() > suppressClickUntil.current,
     onPointerDown(event: PointerEvent<HTMLButtonElement>) {
-      if (event.button !== 0 || !event.isPrimary || !window.companion?.dragWindow) return;
+      if (event.button !== 0 || !event.isPrimary) return;
+      // A pointer press must not move keyboard focus to the transparent pet
+      // button. Its click still opens the input; Tab/Enter remain available.
+      event.preventDefault();
+      if (!window.companion?.dragWindow) return;
       gesture.current = { id: event.pointerId, x: event.screenX, y: event.screenY, moved: false };
       event.currentTarget.setPointerCapture(event.pointerId);
       send('start', { x: event.clientX, y: event.clientY });

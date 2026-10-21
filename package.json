@@ -1,6 +1,6 @@
 {
   "name": "ai-companion-screen",
-  "version": "0.0.0",
+  "version": "0.2.1",
   "private": true,
   "description": "伴屏 AI Companion Screen：Windows 电脑常伴 Agent（开发中）",
   "engines": {
@@ -8,10 +8,19 @@
   },
   "scripts": {
     "desktop:dev": "node scripts/dev.mjs",
+    "desktop:local:build": "node node_modules/typescript/bin/tsc -p apps/desktop/tsconfig.electron.json && node node_modules/vite/bin/vite.js build --config apps/desktop/vite.config.mts --mode local-character --outDir dist-local",
+    "desktop:local": "npm run desktop:local:build && node scripts/local-character.mjs",
+    "desktop:local:package": "npm run typecheck && npm run desktop:local:build && node scripts/package-local.mjs",
+    "test:local-desktop": "node scripts/validate-desktop.mjs --packaged --local-desktop",
+    "test:local-character": "electron scripts/check-local-character.cjs",
     "desktop:build": "node node_modules/typescript/bin/tsc -p apps/desktop/tsconfig.electron.json && node node_modules/vite/bin/vite.js build --config apps/desktop/vite.config.mts",
     "desktop:start": "electron apps/desktop/dist-electron/main.js",
-    "desktop:package": "npm run build && node scripts/package-demo.mjs",
+    "desktop:package": "npm run desktop:local:package",
     "typecheck": "node node_modules/typescript/bin/tsc -p apps/desktop/tsconfig.json --noEmit && node node_modules/typescript/bin/tsc -p apps/desktop/tsconfig.electron.json --noEmit",
+    "test:runtime": "node apps/desktop/electron/agent-runtime.fixture.cjs",
+    "test:layout": "node scripts/test-window-layout.mjs",
+    "test:desktop": "node scripts/validate-desktop.mjs",
+    "test:portable": "node scripts/validate-desktop.mjs --packaged --local-desktop",
     "check:no-vendor": "node scripts/check-no-vendor.mjs",
     "build": "npm run typecheck && npm run desktop:build && npm run check:no-vendor"
   },

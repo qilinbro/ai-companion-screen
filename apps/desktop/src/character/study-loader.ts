@@ -6,16 +6,17 @@ import type {
 import { toStudyState } from './study-map';
 import type { CharacterHandle, CharacterState } from './types';
 
-const SCRIPT_BASE = '/__study';
-const SCRIPTS: readonly string[] = [
-  `${SCRIPT_BASE}/geometry-data.js`,
-  `${SCRIPT_BASE}/src/math.js`,
-  `${SCRIPT_BASE}/src/tables.js`,
-  `${SCRIPT_BASE}/src/pose.js`,
-  `${SCRIPT_BASE}/src/tricks.js`,
-  `${SCRIPT_BASE}/src/fx.js`,
-  `${SCRIPT_BASE}/src/eyes.js`,
-  `${SCRIPT_BASE}/src/character.js`,
+// The offline local entry references existing files; it does not copy the
+// character into build output. The normal release removes this module entirely.
+const SCRIPT_PATHS: readonly string[] = [
+  'geometry-data.js',
+  'src/math.js',
+  'src/tables.js',
+  'src/pose.js',
+  'src/tricks.js',
+  'src/fx.js',
+  'src/eyes.js',
+  'src/character.js',
 ];
 
 let enginePromise: Promise<GrokCharacterConstructor> | null = null;
@@ -43,8 +44,11 @@ export function loadStudyEngine(): Promise<GrokCharacterConstructor> {
   if (enginePromise) return enginePromise;
 
   enginePromise = (async () => {
-    for (const src of SCRIPTS) {
-      await loadScript(src);
+    const scriptBase = import.meta.env.MODE === 'local-character'
+      ? (await window.companion?.getCharacterAssetBase?.() ?? new URL('../../../vendor/grok-study/replica', location.href).href).replace(/\/$/, '')
+      : '/__study';
+    for (const scriptPath of SCRIPT_PATHS) {
+      await loadScript(`${scriptBase}/${scriptPath}`);
     }
     const constructor = window.GrokCharacter;
     if (typeof constructor !== 'function') {

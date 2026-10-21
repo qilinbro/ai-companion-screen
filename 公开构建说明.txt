@@ -1,0 +1,34 @@
+﻿伴屏 AI Companion Screen v0.2.1｜公开源码构建说明
+2026-10-21 · 此文件解释公开提交版与本机专用角色版的区别。
+
+本 ZIP 是现有工程白名单源码快照，包含本项目自行编写的可选本机角色加载胶水；不包含 vendor、第三方原角色的引擎/几何/图像、本机 NOTICE.local、用户配置、密钥、原始屏幕截图、node_modules、任何 dist 或 outputs。没有用可公开读取等同于获准分发。
+README 及历史 docs 中提及的本机原角色路径、快捷方式和 outputs/伴屏-win32-x64 并不随此源码包提供。项目自有开源许可证尚未选定；此公开提交源码不表示向第三方原角色授予任何权利。依赖及引用见 docs/third-party.md。
+
+环境：Windows 10/11 x64、Node.js >= 22.12、图形桌面。下列命令均在解压后的工程根目录执行。
+
+依赖与开发：
+npm ci --include=dev
+npm run desktop:dev
+普通开发入口在缺少本机学习素材时回退本项目原创角色，可能在开发控制台显示素材加载失败提示；这不影响公开生产构建。不要为消除该提示而下载、复制第三方学习角色。
+
+公开生产构建与启动：
+npm run build
+npm run desktop:start
+生产构建使用本项目原创角色，排除第三方学习素材及相应加载分支。构建内含类型检查、Electron 主进程编译、Vite 打包和 check:no-vendor。默认不提供模型访问资格或额度，请在设置自行填写有权使用的兼容服务。
+
+公开便携版本（Windows x64）：
+npm run build
+node scripts/package-demo.mjs
+输出 outputs/伴屏-Demo-win32-x64/，入口为“伴屏 Demo.exe”。这是供需要公开构建时使用的现有脚本说明；本次材料整理没有重新生成或交付旧奶油角色 EXE。分享时保留整个运行目录及依赖许可证；没有安装器或代码签名。
+
+特别注意：npm run desktop:package 当前别名指向本机原角色打包流程，并非公开打包入口。源码包不含该流程必需的角色目录；desktop:local、desktop:local:package、test:local-character、test:local-desktop 也属于本机角色专用流程。请使用上面的公开生产/便携命令。
+test:portable 当前也指向本机专用角色模式，不能当作新公开包验证命令。可先运行 npm run test:desktop 检查公开生产入口；公开便携程序需单独完成启动和交互验证后再形成新证据。
+
+可复现自动化：
+npm run build
+node apps/desktop/electron/agent-runtime.fixture.cjs
+node scripts/test-window-layout.mjs
+npm run test:desktop
+前两组预期为 41 项运行时和 11 项几何模拟。桌面脚本使用本机受控兼容服务，不代表真实模型。已有 30 项本机 EXE 报告含角色专用检查，见提交包 03-AI实践佐证，不等同于公开角色包的验收。
+
+已实现模型工具循环、同机会话画布切换、全屏和取消；真实视觉服务/型号未提供，真实模型效果、实体双屏、混合缩放和拔插仍待验收。语音、终端执行和跨设备连接尚未实现。

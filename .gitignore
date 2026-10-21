@@ -1,6 +1,7 @@
 node_modules/
 dist/
 dist-electron/
+dist-local/
 outputs/
 
 # Local-only third-party study placeholder; never commit or distribute.

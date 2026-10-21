@@ -80,6 +80,9 @@ export async function capturePrimaryScreen(options: {
     void sourcesPromise.then(() => { acquiringSource = false; }, () => { acquiringSource = false; });
     const sources = await abortable(sourcesPromise, job.controller.signal);
     checkCurrent(job);
+    // The canvas target is unrelated to capture. If Windows changed the primary
+    // display during acquisition, discard rather than returning a former primary.
+    if (screen.getPrimaryDisplay().id !== primary.id) throw new Error('主屏幕已变更，请重新读取当前画面。');
     const source = sources.find((item) => item.display_id === String(primary.id));
     if (!source || source.thumbnail.isEmpty()) throw new Error('未获取到主屏幕画面。请检查系统屏幕捕获设置后重试。');
     let image = source.thumbnail;

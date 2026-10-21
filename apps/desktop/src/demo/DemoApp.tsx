@@ -5,6 +5,7 @@ import type { CharacterState } from '../character/types';
 import { ModelSettings } from './ModelSettings';
 import { Icon } from './Icon';
 import { usePetDrag } from './usePetDrag';
+import type { DisplayState } from './desktop';
 
 type Mode = 'idle' | 'input' | 'canvas';
 export function DemoApp() {
@@ -14,11 +15,13 @@ export function DemoApp() {
   const [phase, setPhase] = useState<AgentPhase>('idle');
   const [reaction, setReaction] = useState<{ state: 'feedback' | 'error' } | null>(null);
   const [showSettings, setShowSettings] = useState(false);
+  const [displayState, setDisplayState] = useState<DisplayState | null>(null);
   const [modelName, setModelName] = useState('');
   const [notice, setNotice] = useState('');
   const [preparing, setPreparing] = useState(false);
   const input = useRef<HTMLTextAreaElement>(null);
   const pet = useRef<HTMLButtonElement>(null);
+  const restorePetFocus = useRef(false);
   const composing = useRef(false);
   const changing = useRef(false);
   const submitting = useRef(false);
@@ -26,6 +29,7 @@ export function DemoApp() {
   const conversationId = useRef(`chat-${Date.now()}`);
   const modelTarget = useRef('');
   const busy = phase !== 'idle';
+  const fullscreen = displayState?.fullscreen === true && mode === 'canvas';
   const petDrag = usePetDrag(mode);
   const characterState: CharacterState = petDrag.dragging ? 'dragging' : phase !== 'idle' ? phase : reaction?.state ?? (mode === 'input' ? 'curious' : 'idle');
 
@@ -44,20 +48,32 @@ export function DemoApp() {
   }
 
   useEffect(() => window.companion?.onMode(setMode), []);
+  useEffect(() => {
+    let live = true;
+    const unsubscribe = window.companion?.onDisplayState?.((state) => { if (live) setDisplayState(state); });
+    void window.companion?.getDisplayState?.().then((state) => { if (live) setDisplayState(state); }).catch(() => undefined);
+    return () => { live = false; unsubscribe?.(); };
+  }, []);
   useEffect(() => { document.body.dataset.preview = window.companion ? 'false' : 'true'; void refreshConfig(); }, []);
   useEffect(() => {
     if (mode === 'input') input.current?.focus();
     else composing.current = false;
-    if (mode === 'idle') pet.current?.focus({ preventScroll: true });
+    // Moving focus from the text field makes Chromium preserve :focus-visible.
+    // Only restore it for a keyboard collapse, rather than painting a ring on a
+    // desktop character after every mouse click or initial launch.
+    if (mode === 'idle' && restorePetFocus.current) pet.current?.focus({ preventScroll: true });
+    restorePetFocus.current = false;
   }, [mode]);
   useEffect(() => {
     const keydown = (event: KeyboardEvent) => {
       if (event.key !== 'Escape' || event.defaultPrevented || event.isComposing || composing.current || showSettings) return;
-      event.preventDefault(); void changeMode('idle');
+      event.preventDefault();
+      if (fullscreen) void toggleFullscreen();
+      else { restorePetFocus.current = true; void changeMode('idle'); }
     };
     window.addEventListener('keydown', keydown);
     return () => window.removeEventListener('keydown', keydown);
-  }, [showSettings]);
+  }, [showSettings, fullscreen]);
 
   async function refreshConfig() {
     try { const config = await window.companion?.getModelConfig?.(); if (config) trackConfig(config); }
@@ -82,8 +98,13 @@ export function DemoApp() {
     finally { changing.current = false; }
   }
   async function openSettings() {
-    if (busy || preparing) return;
+    if (preparing) return;
     if (await changeMode('canvas')) setShowSettings(true);
+  }
+  async function toggleFullscreen() {
+    if (!window.companion?.setCanvasFullscreen) return;
+    try { setDisplayState(await window.companion.setCanvasFullscreen(!fullscreen)); }
+    catch { setNotice('暂时无法切换全屏，请重试。'); }
   }
   function closeSettings() {
     setShowSettings(false);
@@ -111,7 +132,7 @@ export function DemoApp() {
     finally { submitting.current = false; setPreparing(false); }
   }
 
-  return <main className={`pet-stage mode-${mode}`} aria-label="伴屏">
+  return <main className={`pet-stage mode-${mode}${fullscreen ? ' is-fullscreen' : ''}`} aria-label="伴屏">
     {mode === 'input' ? <section className="pet-input" aria-label="输入">
       <form onSubmit={(event) => { event.preventDefault(); void submit(); }}>
         <div className="pet-input-row"><textarea ref={input} value={draft} onChange={(event) => setDraft(event.target.value)} placeholder="说点什么…" aria-label="输入内容" maxLength={4000} rows={2} onCompositionStart={() => { composing.current = true; }} onCompositionEnd={() => { composing.current = false; }} onKeyDown={(event) => {
@@ -119,10 +140,10 @@ export function DemoApp() {
         }} /><button className="pet-send" type="submit" disabled={!draft.trim() || busy || preparing} aria-label="发送"><Icon name="arrow" size={18} /></button></div>
       </form>
       {notice ? <p className="pet-input-message" role="status">{notice}</p> : null}
-      <div className="pet-input-footer"><button className="pet-more" onClick={() => void openSettings()} aria-label="模型设置" title="模型设置" disabled={busy || preparing}><Icon name="settings" size={16} /></button>{turn ? <button className="pet-resume" onClick={() => void changeMode('canvas')}>继续对话</button> : <button className="pet-resume" onClick={() => void openSettings()} disabled={preparing}>{modelName || '连接模型'}</button>}<span className="pet-shortcut" aria-hidden="true">Ctrl Alt Space</span><button className="pet-fold" onClick={() => void changeMode('idle')} aria-label="收起"><Icon name="minus" size={16} /></button></div>
+      <div className="pet-input-footer"><button className="pet-more" onClick={() => void openSettings()} aria-label="设置" title="设置" disabled={preparing}><Icon name="settings" size={16} /></button>{turn ? <button className="pet-resume" onClick={() => void changeMode('canvas')}>{busy ? '查看进行中的任务' : '继续对话'}</button> : <button className="pet-resume" onClick={() => void openSettings()} disabled={preparing}>{modelName || '连接模型'}</button>}<span className="pet-shortcut" aria-hidden="true">Ctrl Alt Space</span><button className="pet-fold" onClick={() => void changeMode('idle')} aria-label="收起"><Icon name="minus" size={16} /></button></div>
     </section> : null}
-    <div className="canvas-host" hidden={mode !== 'canvas'} inert={showSettings}><AgentConversation key={conversationId.current} turn={turn} draft={draft} onDraft={setDraft} onSend={() => void submit()} onClose={() => void changeMode('idle')} onSettings={() => void openSettings()} onPhaseChange={onPhaseChange} onOutcome={onOutcome} /></div>
-    {showSettings ? <div className="model-settings-host" hidden={mode !== 'canvas'}><ModelSettings onClose={closeSettings} onSaved={() => { void refreshConfig(); closeSettings(); }} /></div> : null}
-    <div className="pet-home"><button ref={pet} className={`pet-button${petDrag.dragging ? ' is-dragging' : ''}`} disabled={showSettings && mode === 'canvas'} onPointerDown={petDrag.onPointerDown} onPointerMove={petDrag.onPointerMove} onPointerUp={petDrag.onPointerUp} onPointerCancel={petDrag.onPointerCancel} onLostPointerCapture={petDrag.onLostPointerCapture} onDragStart={(event) => event.preventDefault()} onClick={(event) => { if (event.detail === 0 || petDrag.shouldClick()) void changeMode(mode === 'idle' ? 'input' : 'idle'); }} aria-label={mode === 'idle' ? '唤出' : '收起宠物'} title="单击展开，按住拖动"><CompanionCharacter state={characterState} /></button></div>
+    <div className="canvas-host" hidden={mode !== 'canvas'} inert={showSettings}><AgentConversation key={conversationId.current} turn={turn} draft={draft} onDraft={setDraft} onSend={() => void submit()} onClose={() => void changeMode('idle')} onSettings={() => void openSettings()} onPhaseChange={onPhaseChange} onOutcome={onOutcome} fullscreen={fullscreen} onFullscreen={() => void toggleFullscreen()} canFullscreen={Boolean(displayState)} visible={mode === 'canvas' && !showSettings} notice={notice} /></div>
+    {showSettings ? <div className="model-settings-host" hidden={mode !== 'canvas'}><ModelSettings taskRunning={busy} displayState={displayState} onDisplayState={setDisplayState} onClose={closeSettings} onSaved={() => { void refreshConfig(); closeSettings(); }} /></div> : null}
+    <div className="pet-home"><button ref={pet} className={`pet-button${petDrag.dragging ? ' is-dragging' : ''}`} disabled={showSettings && mode === 'canvas'} onPointerDown={petDrag.onPointerDown} onPointerMove={petDrag.onPointerMove} onPointerUp={petDrag.onPointerUp} onPointerCancel={petDrag.onPointerCancel} onLostPointerCapture={petDrag.onLostPointerCapture} onDragStart={(event) => event.preventDefault()} onClick={(event) => { if (event.detail === 0 || petDrag.shouldClick()) { restorePetFocus.current = event.detail === 0 && mode !== 'idle'; void changeMode(mode === 'idle' ? 'input' : 'idle'); } }} aria-label={mode === 'idle' ? '唤出' : '收起宠物'} title="单击展开，按住拖动"><CompanionCharacter state={characterState} /></button></div>
   </main>;
 }

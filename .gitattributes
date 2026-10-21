@@ -1,0 +1,7 @@
+# Preserve published artifact bytes for the accompanying SHA256 manifests.
+showcase/v0.2.1/materials/** -text -whitespace
+*.zip binary
+*.pdf binary
+*.png binary
+*.gif binary
+*.mp4 binary

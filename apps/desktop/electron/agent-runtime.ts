@@ -21,12 +21,116 @@ type RuntimeOptions = {
   fetch?: typeof globalThis.fetch;
   timeoutMs?: number;
 };
+export type ModelConnectionCode = 'connected' | 'not_configured' | 'authentication' | 'address' | 'model' | 'capability' | 'invalid_response' | 'network' | 'timeout' | 'cancelled' | 'provider_error';
+export type ModelConnectionResult = {
+  ok: boolean;
+  code: ModelConnectionCode;
+  message: string;
+  checks: { text: boolean; streaming: boolean; tools: boolean; vision: 'not_tested' };
+};
 class AgentFailure extends Error {
   constructor(readonly code: string, message: string) { super(message); }
 }
 function object(value: unknown): value is Record<string, unknown> { return Boolean(value) && typeof value === 'object' && !Array.isArray(value); }
 function abortError(signal: AbortSignal): Error { return signal.reason instanceof Error ? signal.reason : new AgentFailure('cancelled', '已停止。'); }
 function checkSignal(signal: AbortSignal): void { if (signal.aborted) throw abortError(signal); }
+function completionBody(config: RuntimeModelConfig, messages: ChatMessage[], toolChoice: 'none' | 'auto' | { type: 'function'; function: { name: string } } = 'auto'): string {
+  return JSON.stringify({ model: config.modelId, messages, stream: true, tools: [{ type: 'function', function: { name: CAPTURE_SCREEN_TOOL.name, description: CAPTURE_SCREEN_TOOL.description, parameters: CAPTURE_SCREEN_TOOL.parameters, strict: true } }], tool_choice: toolChoice, parallel_tool_calls: false });
+}
+function requestHeaders(config: RuntimeModelConfig): Record<string, string> {
+  return { 'Content-Type': 'application/json', Accept: 'text/event-stream', ...(config.apiKey ? { Authorization: `Bearer ${config.apiKey}` } : {}) };
+}
+function configured(input: RuntimeModelConfig): RuntimeModelConfig {
+  if (!input.baseUrl || !input.modelId) throw new AgentFailure('not_configured', '先在模型设置中填写服务地址和模型名称。');
+  let baseUrl: string;
+  try { baseUrl = normalizeModelBaseUrl(input.baseUrl); }
+  catch { throw new AgentFailure('address', '模型服务地址无效，请填写完整的 HTTPS 地址；本机服务可使用 HTTP。'); }
+  if (!input.apiKey && !isLocalModelUrl(baseUrl)) throw new AgentFailure('not_configured', '这个模型服务还没有 API Key，请在模型设置中填写。');
+  return { ...input, baseUrl };
+}
+
+async function providerFailure(response: Response, signal: AbortSignal): Promise<AgentFailure> {
+  const status = `HTTP ${response.status}`;
+  if (response.status === 401 || response.status === 403) {
+    void response.body?.cancel().catch(() => undefined);
+    return new AgentFailure('authentication', `认证失败（${status}），请检查密钥及该服务的访问权限。`);
+  }
+  if (response.status === 429) {
+    void response.body?.cancel().catch(() => undefined);
+    return new AgentFailure('provider_error', '服务请求较多或额度不足（HTTP 429），请稍后重试。');
+  }
+  if (response.status >= 500) {
+    void response.body?.cancel().catch(() => undefined);
+    return new AgentFailure('provider_error', `模型服务暂时不可用（${status}），请稍后重试。`);
+  }
+  // Inspect only a bounded error envelope for classification. Never return the
+  // provider's raw body: it may echo credentials, prompts or image data.
+  let details = '';
+  const reader = response.body?.getReader();
+  if (reader) {
+    try {
+      const decoder = new TextDecoder();
+      let bytes = 0;
+      while (bytes < 32768) {
+        const part = await waitWithSignal(reader.read(), signal);
+        if (part.done) break;
+        bytes += part.value.byteLength;
+        details += decoder.decode(part.value.subarray(0, Math.max(0, 32768 - (bytes - part.value.byteLength))), { stream: true });
+      }
+    } catch { checkSignal(signal); }
+    finally { void reader.cancel().catch(() => undefined); reader.releaseLock(); }
+  }
+  const unknownModel = /model[_ -]?(?:not[_ -]?found|unavailable|does[_ -]?not[_ -]?exist)|(?:unknown|invalid|unsupported|unrecognized|not found|does not exist)[^\n]{0,48}model|model[^\n]{0,64}(?:not found|does not exist|not available|not supported|unknown|invalid)/i.test(details);
+  if (unknownModel) return new AgentFailure('model', `模型不可用（${status}），请检查模型名称和账户是否有使用权限。`);
+  if (response.status === 404 || response.status === 405 || response.status === 301 || response.status === 302) return new AgentFailure('address', `服务路径不可用（${status}），请填写 Chat Completions 服务的基础地址。`);
+  if ([400, 415, 422].includes(response.status) && /tool|function|vision|image|multimodal|stream|parallel_tool_calls|strict/i.test(details)) return new AgentFailure('capability', `服务未接受当前调用能力（${status}），请确认模型支持流式回复、工具调用和图片输入。`);
+  return new AgentFailure('provider_error', `模型服务返回 ${status}，请检查服务状态、地址及模型名称。`);
+}
+
+/** Text and tool-protocol probe only. It never invokes a tool or acquires pixels. */
+export async function checkModelConnection(input: RuntimeModelConfig, options: { fetch?: typeof globalThis.fetch; timeoutMs?: number; signal?: AbortSignal } = {}): Promise<ModelConnectionResult> {
+  const checks: ModelConnectionResult['checks'] = { text: false, streaming: false, tools: false, vision: 'not_tested' };
+  const controller = new AbortController();
+  const abort = (): void => controller.abort(new AgentFailure('cancelled', '连接检测已停止。'));
+  options.signal?.addEventListener('abort', abort, { once: true });
+  if (options.signal?.aborted) abort();
+  const timer = setTimeout(() => controller.abort(new AgentFailure('timeout', '连接检测超时，请检查网络或服务状态。')), options.timeoutMs ?? 20000);
+  const signal = controller.signal;
+  try {
+    const config = configured(input);
+    const providerFetch = options.fetch ?? globalThis.fetch;
+    const send = async (messages: ChatMessage[], toolChoice: 'none' | { type: 'function'; function: { name: string } }): Promise<{ completion: Completion; streaming: boolean }> => {
+      checkSignal(signal);
+      const body = toolChoice === 'none' ? JSON.stringify({ model: config.modelId, messages, stream: true }) : completionBody(config, messages, toolChoice);
+      const response = await waitWithSignal(providerFetch(`${config.baseUrl}/chat/completions`, { method: 'POST', redirect: 'error', signal, headers: requestHeaders(config), body }), signal);
+      checkSignal(signal);
+      if (!response.ok) throw await providerFailure(response, signal);
+      const streaming = (response.headers.get('content-type') ?? '').toLowerCase().includes('text/event-stream');
+      return { completion: await readChatCompletion(response, signal, () => undefined), streaming };
+    };
+    const first = await send([{ role: 'user', content: '这是连接检测。只回复一句简短问候，不使用工具，不查看屏幕。' }], 'none');
+    if (!first.completion.text.trim() || first.completion.calls.length || first.completion.finishReason !== 'stop') throw new AgentFailure('invalid_response', '服务没有返回完整的文字回答，请检查模型与 Chat Completions 响应格式。');
+    checks.text = true;
+    checks.streaming = first.streaming;
+    const second = await send([{ role: 'system', content: '这是工具协议连接检测。只生成 capture_screen 的空参数工具请求；检测器不会执行工具，不会读取屏幕。' }, { role: 'user', content: '请返回一次 capture_screen 工具调用，参数为 {}。' }], { type: 'function', function: { name: 'capture_screen' } });
+    checks.streaming = checks.streaming && second.streaming;
+    const call = second.completion.calls[0];
+    let validArguments = false;
+    try { const args: unknown = JSON.parse(call?.function.arguments ?? 'null'); validArguments = object(args) && Object.keys(args).length === 0; } catch { /* Report unsupported protocol, never execute it. */ }
+    checks.tools = second.completion.calls.length === 1 && call?.function.name === 'capture_screen' && validArguments && second.completion.finishReason === 'tool_calls';
+    if (!checks.tools) throw new AgentFailure('capability', '文字连接可用，但模型没有返回有效工具调用。请选用支持工具调用的模型。');
+    if (!checks.streaming) throw new AgentFailure('capability', '文字与工具调用可用，但服务没有返回流式响应。请确认服务支持 stream。');
+    return { ok: true, code: 'connected', message: '文字、流式响应和工具调用已连通。未读取屏幕；图片理解仍需实际看屏任务验证。', checks };
+  } catch (error) {
+    const failure = signal.aborted ? abortError(signal) : error;
+    const code = failure instanceof AgentFailure ? failure.code : 'network';
+    const allowed: ModelConnectionCode[] = ['not_configured', 'authentication', 'address', 'model', 'capability', 'invalid_response', 'network', 'timeout', 'cancelled', 'provider_error'];
+    return { ok: false, code: allowed.includes(code as ModelConnectionCode) ? code as ModelConnectionCode : 'invalid_response', message: failure instanceof AgentFailure ? failure.message : '无法连接模型服务，请检查网络和服务地址。', checks };
+  } finally {
+    clearTimeout(timer);
+    options.signal?.removeEventListener('abort', abort);
+  }
+}
 // This is a conservative permission denial, not task/intent classification.
 // A model request can never override a user's explicit refusal in this turn.
 function screenDeniedInPrompt(prompt: string): boolean {
@@ -49,6 +153,11 @@ function waitWithSignal<T>(promise: Promise<T>, signal: AbortSignal): Promise<T>
 // SSE boundaries need not match network chunks or UTF-8 characters. Only
 // complete data frames are parsed; the stream itself is never written to disk.
 export async function readChatCompletion(response: Response, signal: AbortSignal, onDelta: (text: string) => void): Promise<Completion> {
+  const contentType = (response.headers.get('content-type') ?? '').toLowerCase();
+  if (contentType && !contentType.includes('text/event-stream') && !contentType.includes('application/json') && !/application\/[^;]+\+json/.test(contentType)) {
+    void response.body?.cancel().catch(() => undefined);
+    throw new AgentFailure('invalid_response', '服务没有返回 Chat Completions 流式或 JSON 响应，请检查地址是否指向 API。');
+  }
   const reader = response.body?.getReader();
   if (!reader) throw new AgentFailure('invalid_response', '模型服务没有返回响应内容。');
   const decoder = new TextDecoder('utf-8', { fatal: false });
@@ -106,7 +215,7 @@ export async function readChatCompletion(response: Response, signal: AbortSignal
     else if (normalized.startsWith('data:')) data.push(normalized.slice(5).replace(/^ /, ''));
   };
   try {
-    const isJson = (response.headers.get('content-type') ?? '').includes('application/json');
+    const isJson = contentType.includes('application/json') || /application\/[^;]+\+json/.test(contentType);
     while (!sawDone) {
       const result = await waitWithSignal(reader.read(), signal);
       checkSignal(signal);
@@ -128,6 +237,9 @@ export async function readChatCompletion(response: Response, signal: AbortSignal
     checkSignal(signal);
     if (!finishReason) throw new AgentFailure('incomplete_response', '模型连接在回答完成前结束，请重试。');
     const completeCalls = [...calls.entries()].sort(([left], [right]) => left - right).map(([, call]) => call);
+    if (!['stop', 'tool_calls', 'length', 'content_filter'].includes(finishReason)) throw new AgentFailure('invalid_response', '模型返回了不支持的结束状态，请检查服务兼容性。');
+    if (completeCalls.length && finishReason !== 'tool_calls') throw new AgentFailure('invalid_tool', '模型工具请求没有完整结束，未执行工具。');
+    if (!completeCalls.length && finishReason === 'tool_calls') throw new AgentFailure('invalid_tool', '模型没有返回完整工具请求。');
     if (completeCalls.some((call) => !call.id || !call.function.name) || new Set(completeCalls.map((call) => call.id)).size !== completeCalls.length) throw new AgentFailure('invalid_tool', '模型工具请求缺少有效标识。');
     return { text, calls: completeCalls, finishReason };
   } finally {
@@ -185,10 +297,7 @@ export class AgentRuntime {
     const messages: ChatMessage[] = [];
     let timer: ReturnType<typeof setTimeout> | undefined;
     try {
-      const supplied = this.options.getConfig();
-      if (!supplied.baseUrl || !supplied.modelId) throw new AgentFailure('not_configured', '先在模型设置中填写服务地址和模型名称。');
-      const config = { ...supplied, baseUrl: normalizeModelBaseUrl(supplied.baseUrl) };
-      if (!config.apiKey && !isLocalModelUrl(config.baseUrl)) throw new AgentFailure('not_configured', '这个模型服务还没有 API Key，请在模型设置中填写。');
+      const config = configured(this.options.getConfig());
       timer = setTimeout(() => {
         job.controller.abort(new AgentFailure('timeout', '这次请求超过 90 秒，已停止。可以重试或换一个模型。'));
         if (job.captureId) this.options.cancelCapture(job.captureId);
@@ -202,18 +311,17 @@ export class AgentRuntime {
       let hasScreen = false;
       for (let round = 0; round < 3; round += 1) {
         checkSignal(signal);
+        const current = this.options.getConfig();
+        if (current.baseUrl !== config.baseUrl || current.modelId !== config.modelId || current.apiKey !== config.apiKey) throw new AgentFailure('config_changed', '模型配置已改变，本次请求已停止，请重新发送。');
+        if (hasScreen && !current.allowScreen) throw new AgentFailure('screen_not_allowed', '屏幕授权已撤销，本次请求已停止。');
         this.emit(job, { requestId: job.requestId, type: 'status', status: hasScreen ? 'viewing' : 'thinking' });
         const response = await waitWithSignal(providerFetch(`${config.baseUrl}/chat/completions`, {
           method: 'POST', redirect: 'error', signal,
-          headers: { 'Content-Type': 'application/json', Accept: 'text/event-stream', ...(config.apiKey ? { Authorization: `Bearer ${config.apiKey}` } : {}) },
-          body: JSON.stringify({ model: config.modelId, messages, stream: true, tools: [{ type: 'function', function: { name: CAPTURE_SCREEN_TOOL.name, description: CAPTURE_SCREEN_TOOL.description, parameters: CAPTURE_SCREEN_TOOL.parameters, strict: true } }], tool_choice: round === 2 ? 'none' : 'auto', parallel_tool_calls: false }),
+          headers: requestHeaders(config),
+          body: completionBody(config, messages, round === 2 ? 'none' : 'auto'),
         }), signal);
         checkSignal(signal);
-        if (!response.ok) {
-          void response.body?.cancel().catch(() => undefined);
-          const hint = response.status === 401 || response.status === 403 ? '请检查 API Key 和服务权限。' : response.status === 429 ? '服务请求较多或额度不足，请稍后重试。' : '请检查服务地址、模型名称与服务状态。';
-          throw new AgentFailure('provider_error', `模型服务返回 HTTP ${response.status}。${hint}`);
-        }
+        if (!response.ok) throw await providerFailure(response, signal);
         let responding = false;
         const completion = await readChatCompletion(response, signal, (delta) => {
           if (!responding) { this.emit(job, { requestId: job.requestId, type: 'status', status: 'responding' }); responding = true; }
@@ -235,13 +343,15 @@ export class AgentRuntime {
         let imageMessage: ChatMessage | null = null;
         for (const call of completion.calls) {
           checkSignal(signal);
+          const currentConfig = this.options.getConfig();
+          const stillAuthorized = config.allowScreen && currentConfig.allowScreen && currentConfig.baseUrl === config.baseUrl && currentConfig.modelId === config.modelId && currentConfig.apiKey === config.apiKey;
           let result: Record<string, unknown>;
           if (call.function.name !== 'capture_screen') result = { error: 'unsupported_tool', message: '只有 capture_screen 工具可用。没有执行其它操作。' };
-          else if (!config.allowScreen || screenDeniedInPrompt(prompt)) result = { error: 'screen_not_allowed', message: '用户未授权当前请求向模型服务发送主屏画面，或明确要求不要截图。未截图、未发送图片。请尊重要求并依据已有文字回答。' };
+          else if (!stillAuthorized || screenDeniedInPrompt(prompt)) result = { error: 'screen_not_allowed', message: '用户未授权当前请求向模型服务发送主屏画面，或明确要求不要截图。未截图、未发送图片。请尊重要求并依据已有文字回答。' };
           else if (capturedThisRound) result = { error: 'capture_limit', message: '这一轮已经获取画面，请使用已有截图。' };
           else {
             let validArguments = false;
-            try { const args: unknown = JSON.parse(call.function.arguments || '{}'); validArguments = object(args) && Object.keys(args).length === 0; } catch { /* Invalid arguments are a tool error, never executable input. */ }
+            try { const args: unknown = JSON.parse(call.function.arguments); validArguments = object(args) && Object.keys(args).length === 0; } catch { /* Invalid arguments are a tool error, never executable input. */ }
             if (!validArguments) result = { error: 'invalid_arguments', message: 'capture_screen 不接受参数。未截图。' };
             else {
               job.captureId = `${job.requestId}-s${round}`;
@@ -250,6 +360,12 @@ export class AgentRuntime {
               try {
                 const capture = await waitWithSignal(this.options.capture(job.captureId, signal), signal);
                 checkSignal(signal);
+                const afterCapture = this.options.getConfig();
+                if (!afterCapture.allowScreen || afterCapture.baseUrl !== config.baseUrl || afterCapture.modelId !== config.modelId || afterCapture.apiKey !== config.apiKey) {
+                  result = { error: 'screen_not_allowed', message: '屏幕授权或模型配置已经改变，本次画面已丢弃，未发送图片。' };
+                  messages.push({ role: 'tool', tool_call_id: call.id, content: JSON.stringify(result) });
+                  continue;
+                }
                 capturedThisRound = true;
                 hasScreen = true;
                 this.emit(job, { requestId: job.requestId, type: 'capture', capture });

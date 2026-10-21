@@ -1,0 +1,158 @@
+﻿伴屏 AI Companion Screen｜公开源码 ZIP 干净解压构建验证
+执行日期：2026-10-21（Asia/Shanghai）
+验证对象：伴屏-v0.2.1-公开源码.zip 初始 70 文件快照（后续若仅修正文档将另记）。
+方法：解压到 outputs/showcase-work/source-check，未复制旧 dist 或 vendor。通过 junction 复用现有锁定版本 node_modules，不重复联网安装；这不是从空缓存执行依赖安装的验证。没有启动 Electron 桌面、没有生成 EXE，也没有读写用户 EXE/profile。
+结果：类型检查、Electron 编译、Vite 生产构建和素材排除检查通过；运行时 41/41、几何 11/11 通过。上述测试不调用真实模型，不是 AI 效果或实体双屏评测。
+环境说明：首次沙箱内构建在 Vite Windows路径解析时被 spawn EPERM 阻断；同一 npm run build 窄范围提升后成功。未为此修改源代码。下面保留首次失败及重试输出，用户绝对路径已脱敏。
+
+首次命令：npm run build
+退出码：1
+
+> ai-companion-screen@0.2.1 build
+> npm run typecheck && npm run desktop:build && npm run check:no-vendor
+
+
+> ai-companion-screen@0.2.1 typecheck
+> node node_modules/typescript/bin/tsc -p apps/desktop/tsconfig.json --noEmit && node node_modules/typescript/bin/tsc -p apps/desktop/tsconfig.electron.json --noEmit
+
+
+> ai-companion-screen@0.2.1 desktop:build
+> node node_modules/typescript/bin/tsc -p apps/desktop/tsconfig.electron.json && node node_modules/vite/bin/vite.js build --config apps/desktop/vite.config.mts
+
+failed to load config from [工程根目录]\outputs\showcase-work\source-check\apps\desktop\vite.config.mts
+error during build:
+Error: Build failed with 1 error:
+
+[plugin externalize-deps]
+Error: spawn EPERM
+    at ChildProcess.spawn (node:internal/child_process:421:11)
+    at spawn (node:child_process:796:9)
+    at Object.execFile (node:child_process:349:17)
+    at exec (node:child_process:236:25)
+    at optimizeSafeRealPathSync (file:///[工程根目录]/node_modules/vite/dist/node/chunks/node.js:2481:2)
+    at windowsSafeRealPathSync (file:///[工程根目录]/node_modules/vite/dist/node/chunks/node.js:2467:3)
+    at getRealPath (file:///[工程根目录]/node_modules/vite/dist/node/chunks/node.js:29592:36)
+    at tryResolveRealFileOrType (file:///[工程根目录]/node_modules/vite/dist/node/chunks/node.js:29586:9)
+    at tryCleanFsResolve (file:///[工程根目录]/node_modules/vite/dist/node/chunks/node.js:29335:21)
+    at tryFsResolve (file:///[工程根目录]/node_modules/vite/dist/node/chunks/node.js:29328:14)
+    at aggregateBindingErrorsIntoJsError (file:///[工程根目录]/node_modules/rolldown/dist/shared/error-CBG33oNV.mjs:49:18)
+    at unwrapBindingResult (file:///[工程根目录]/node_modules/rolldown/dist/shared/error-CBG33oNV.mjs:19:128)
+    at #build (file:///[工程根目录]/node_modules/rolldown/dist/shared/rolldown-BYX6bV3R.mjs:146:34)
+    at async bundleConfigFile (file:///[工程根目录]/node_modules/vite/dist/node/chunks/node.js:38081:12)
+    at async bundleAndLoadConfigFile (file:///[工程根目录]/node_modules/vite/dist/node/chunks/node.js:37977:18)
+    at async loadConfigFromFile (file:///[工程根目录]/node_modules/vite/dist/node/chunks/node.js:37938:42)
+    at async resolveConfig (file:///[工程根目录]/node_modules/vite/dist/node/chunks/node.js:37540:22)
+    at async createBuilder (file:///[工程根目录]/node_modules/vite/dist/node/chunks/node.js:35112:17)
+    at async CAC.<anonymous> (file:///[工程根目录]/node_modules/vite/dist/node/cli.js:769:19) {
+  errors: [Getter/Setter]
+}
+
+重试命令：npm run build
+退出码：0
+
+> ai-companion-screen@0.2.1 build
+> npm run typecheck && npm run desktop:build && npm run check:no-vendor
+
+
+> ai-companion-screen@0.2.1 typecheck
+> node node_modules/typescript/bin/tsc -p apps/desktop/tsconfig.json --noEmit && node node_modules/typescript/bin/tsc -p apps/desktop/tsconfig.electron.json --noEmit
+
+
+> ai-companion-screen@0.2.1 desktop:build
+> node node_modules/typescript/bin/tsc -p apps/desktop/tsconfig.electron.json && node node_modules/vite/bin/vite.js build --config apps/desktop/vite.config.mts
+
+vite v8.3.4 building client environment for production...
+transforming...
+✓ 32 modules transformed.
+rendering chunks...
+computing gzip size...
+apps/desktop/dist/character.html                   0.65 kB │ gzip:  0.36 kB
+apps/desktop/dist/assets/character-Cj1U0c1t.css   37.14 kB │ gzip:  7.76 kB
+apps/desktop/dist/assets/character-C1P3-FX8.js   252.39 kB │ gzip: 78.84 kB
+
+✓ built in 126ms
+
+> ai-companion-screen@0.2.1 check:no-vendor
+> node scripts/check-no-vendor.mjs
+
+[check:no-vendor] 未检测到 Git 工作区，跳过索引检查。
+[check:no-vendor] OK：dist 与 git 索引均不含本地学习占位素材。
+
+命令：node apps/desktop/electron/agent-runtime.fixture.cjs
+退出码：0
+✔ SSE reconstructs split UTF-8, CRLF, multiline frames and fragmented function calls (23.8167ms)
+✔ text-only response streams without any screen read (5.8744ms)
+✔ model chooses capture; real injected handler result is passed as metadata plus image input (4.3802ms)
+✔ no screen consent returns a restricted tool error without capture or image upload (4.563ms)
+✔ explicit screen denial returns a restricted tool error without capture or image upload (3.2221ms)
+✔ screen not needed returns a restricted tool error without capture or image upload (3.047ms)
+✔ direct do-not-capture returns a restricted tool error without capture or image upload (5.2292ms)
+✔ do-not-perform-capture returns a restricted tool error without capture or image upload (2.4005ms)
+✔ deferred desktop capture denied returns a restricted tool error without capture or image upload (10.0231ms)
+✔ polite screen denial returns a restricted tool error without capture or image upload (4.1866ms)
+✔ English screen denial returns a restricted tool error without capture or image upload (2.902ms)
+✔ unsupported tool returns a restricted tool error without capture or image upload (7.932ms)
+✔ unexpected tool arguments returns a restricted tool error without capture or image upload (1.8426ms)
+✔ missing JSON tool arguments returns a restricted tool error without capture or image upload (3.8405ms)
+✔ cancellation suppresses late chunks and allows a new request (72.0388ms)
+✔ a remote endpoint without project credentials is rejected before fetch (0.3681ms)
+✔ provider errors never expose server body or credentials (14.0986ms)
+✔ truncated SSE fails rather than claiming a completed answer (14.579ms)
+✔ three provider rounds cap repeated model tool calls (2.6565ms)
+✔ deadline aborts a stalled stream with exactly one terminal event (27.3238ms)
+✔ multi-turn context is text only, bounded, and cleared across provider/model changes (124.1649ms)
+✔ a completed screen turn never replays image or tool messages in the next turn (15.1138ms)
+✔ stopping during capture cancels the screenshot and commits no assistant history (30.0574ms)
+✔ JSON-compatible fallback returns actual provider text (14.8149ms)
+✔ a new screen question captures a fresh image, without replaying the old image (4.0314ms)
+✔ revoking consent while waiting for the model prevents a subsequent tool read (6.6426ms)
+✔ revocation while pixels are acquired discards them before preview and model upload (1.7092ms)
+✔ late capture after stopping cannot upload, emit preview, or change the next turn (48.4583ms)
+✔ partial tool calls and unknown finish statuses never execute capture (45.7987ms)
+✔ network interruption after a delta ends once without committing a completed turn (34.3946ms)
+✔ a provider HTML page is a format error rather than a completed model response (12.8811ms)
+✔ connection check confirms text, SSE and actual tool protocol without capturing (2.8995ms)
+✔ connection check classifies authentication without exposing the provider error envelope (0.3413ms)
+✔ connection check classifies API path without exposing the provider error envelope (0.3703ms)
+✔ connection check classifies unknown model without exposing the provider error envelope (0.3059ms)
+✔ connection check classifies tool capability without exposing the provider error envelope (0.3081ms)
+✔ connection check classifies quota without exposing the provider error envelope (0.1145ms)
+✔ connection check distinguishes a text model ignoring forced tools (1.3684ms)
+✔ connection check reports non-streaming JSON support precisely (0.5174ms)
+✔ connection check handles format, network, timeout and cancellation without provider text (9.7065ms)
+✔ connection settings use only this endpoint credential and never grant permission (0.5609ms)
+ℹ tests 41
+ℹ suites 0
+ℹ pass 41
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 577.0712
+
+命令：node scripts/test-window-layout.mjs
+退出码：0
+✔ all three modes fit available work areas and taskbars in DIP (1.1097ms)
+✔ selecting output from input leaves the pet and input on their own screen (0.78ms)
+✔ expanding input at an edge never overwrites the logical pet anchor (0.2518ms)
+✔ canvas movement and fullscreen preserve independent pet and normal bounds (0.17ms)
+✔ each monitor restores its own canvas placement after switching (0.1087ms)
+✔ unplugged fullscreen canvas falls back visibly and reconnects to its preferred monitor (0.1926ms)
+✔ a pet from a disconnected display is clamped onto a remaining display (0.0962ms)
+✔ scaling and taskbar changes clamp saved bounds without applying pixel ratios (0.1053ms)
+✔ tiny work areas shrink every mode and oversize dragged windows remain visible (0.0975ms)
+✔ unavailable and malformed display choices are rejected without moving output (0.4336ms)
+✔ collapsing a fullscreen canvas clears fullscreen but keeps its output preference (0.1039ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 8.5185
+
+
+最终源码快照说明（2026-10-21）：
+初始 70 文件公开源码 ZIP 已干净解压并完成 npm run build、运行时 41/41 和几何 11/11。之后仅新增 README-PUBLIC-WINDOWS.txt 与 docs/07-public-submission.md、更新 README 链接，并将 scripts/package-demo.mjs 的公开使用说明拷贝指向改为公开版 README。最终 ZIP 为 72 文件；已重新核对 ZIP CRC、逐文件 SHA256、白名单及脱敏扫描，且 node --check scripts/package-demo.mjs 退出码为 0。上述变化不修改被测 TypeScript 运行时或窗口几何代码；未重新运行桌面、未生成任何 EXE。清洁解压的 node_modules junction 已仅移除链接本身，复用的工程依赖保留。
+完整构建及测试输出见 03-AI实践佐证/公开源码干净解压构建记录.txt。最终 ZIP SHA256：6d04a36264226328668ad37cce3e9dc838b82ec19baa8378ca166668d31c51da

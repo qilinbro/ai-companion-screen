@@ -1,0 +1,265 @@
+{
+  "kind": "Windows native Electron + controlled loopback protocol (not a real model)",
+  "tag": "local-desktop",
+  "date": "2026-10-21T09:23:52.602Z",
+  "checks": [
+    {
+      "label": "native startup",
+      "passed": true,
+      "detail": {
+        "bounds": {
+          "x": 2260,
+          "y": 1192,
+          "width": 180,
+          "height": 180
+        },
+        "packaged": true,
+        "displays": [
+          {
+            "scaleFactor": 1,
+            "bounds": {
+              "x": 0,
+              "y": 0,
+              "width": 2560,
+              "height": 1440
+            },
+            "workArea": {
+              "x": 0,
+              "y": 0,
+              "width": 2560,
+              "height": 1392
+            }
+          }
+        ]
+      }
+    },
+    {
+      "label": "20 native pet clicks retain original SVG and avoid circular focus outline",
+      "passed": true,
+      "detail": {
+        "outline": "none",
+        "pointerPrevented": true,
+        "placeholder": false
+      }
+    },
+    {
+      "label": "pet clicks avoid repeated window styles and hide/show",
+      "passed": true,
+      "detail": {
+        "setResizable": 0,
+        "setSkipTaskbar": 0,
+        "setAlwaysOnTop": 0,
+        "hide": 0,
+        "show": 0
+      }
+    },
+    {
+      "label": "keyboard open and Esc preserve accessible focus without ring",
+      "passed": true,
+      "detail": true
+    },
+    {
+      "label": "empty profile and permission default",
+      "passed": true,
+      "detail": true
+    },
+    {
+      "label": "legacy capture IPC permission enforced",
+      "passed": true,
+      "detail": true
+    },
+    {
+      "label": "display selector in settings",
+      "passed": true,
+      "detail": [
+        "主屏 · [显示器名称已脱敏] · 100%"
+      ]
+    },
+    {
+      "label": "connection check is explicit about untested vision",
+      "passed": true,
+      "detail": {
+        "ok": true,
+        "code": "connected",
+        "message": "文字、流式响应和工具调用已连通。未读取屏幕；图片理解仍需实际看屏任务验证。",
+        "checks": {
+          "text": true,
+          "streaming": true,
+          "tools": true,
+          "vision": "not_tested"
+        }
+      }
+    },
+    {
+      "label": "plain text without capture",
+      "passed": true,
+      "detail": true
+    },
+    {
+      "label": "denied screen request explains without capture",
+      "passed": true,
+      "detail": true
+    },
+    {
+      "label": "tool request captures real primary PNG",
+      "passed": true,
+      "detail": true
+    },
+    {
+      "label": "changed screen obtains new PNG",
+      "passed": true,
+      "detail": true
+    },
+    {
+      "label": "fullscreen covers complete display including taskbar area",
+      "passed": true,
+      "detail": {
+        "bounds": {
+          "x": 0,
+          "y": 0,
+          "width": 2560,
+          "height": 1440
+        },
+        "nativeFlag": false,
+        "display": {
+          "x": 0,
+          "y": 0,
+          "width": 2560,
+          "height": 1440
+        }
+      }
+    },
+    {
+      "label": "fullscreen button exit restores canvas bounds",
+      "passed": true,
+      "detail": true
+    },
+    {
+      "label": "native Esc exits fullscreen and restores bounds",
+      "passed": true,
+      "detail": true
+    },
+    {
+      "label": "collapse restores separate pet anchor",
+      "passed": true,
+      "detail": true
+    },
+    {
+      "label": "position changes preserve replies and do not resend",
+      "passed": true,
+      "detail": true
+    },
+    {
+      "label": "stop isolates late data",
+      "passed": true,
+      "detail": true
+    },
+    {
+      "label": "stop immediately restores idle character",
+      "passed": true,
+      "detail": true
+    },
+    {
+      "label": "authentication failure ends",
+      "passed": true,
+      "detail": true
+    },
+    {
+      "label": "invalid response ends",
+      "passed": true,
+      "detail": true
+    },
+    {
+      "label": "network interruption ends",
+      "passed": true,
+      "detail": true
+    },
+    {
+      "label": "controlled suspend cancels without replay",
+      "passed": true,
+      "detail": true
+    },
+    {
+      "label": "close cancels and tray-style reopen retains session",
+      "passed": true,
+      "detail": true
+    },
+    {
+      "label": "long stream respects reading position",
+      "passed": true,
+      "detail": 0
+    },
+    {
+      "label": "code blocks and copy controls",
+      "passed": true,
+      "detail": 9
+    },
+    {
+      "label": "code copy writes exact text to native clipboard",
+      "passed": true,
+      "detail": true
+    },
+    {
+      "label": "unknown display rejected",
+      "passed": true,
+      "detail": true
+    },
+    {
+      "label": "config excludes screen grant and plaintext secret",
+      "passed": true,
+      "detail": true
+    },
+    {
+      "label": "conversation and screen not stored in localStorage",
+      "passed": true,
+      "detail": true
+    }
+  ],
+  "displays": [
+    {
+      "scaleFactor": 1,
+      "bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 2560,
+        "height": 1440
+      },
+      "workArea": {
+        "x": 0,
+        "y": 0,
+        "width": 2560,
+        "height": 1392
+      }
+    }
+  ],
+  "fixture": {
+    "requests": 16,
+    "pngCount": 2,
+    "imageHashes": [
+      "f9862084d0405f684585145c28849bd3d8224775e581aa778ed312d1c758f130",
+      "45dff97b1db106be95b34ea9c66ceba57340140a47b6bd0b92d735b3ab60c2b4"
+    ]
+  },
+  "characterStyleCalls": {
+    "setResizable": 0,
+    "setSkipTaskbar": 0,
+    "setAlwaysOnTop": 0,
+    "hide": 0,
+    "show": 0
+  },
+  "status": "passed",
+  "_public_submission_note": {
+    "source": "outputs/validation/v02-local-desktop.json",
+    "redacted": [
+      "display IDs",
+      "display model/name",
+      "user paths if present"
+    ],
+    "original_report_date_utc": "2026-10-21T09:23:52.602Z",
+    "check_count": 30,
+    "passed_count": 30,
+    "evidence_scope": "Historical Windows native local EXE with controlled loopback responses; not real AI inference; no real dual-monitor hardware validation.",
+    "character_scope": "Character assertions describe the local-only character build. No character media or third-party original files are included in this public evidence.",
+    "png_scope": "Report records two valid different primary-screen PNGs; only hashes are shared, no pixels."
+  }
+}

@@ -1,0 +1,391 @@
+{
+  "created_at": "2026-10-21T17:45:52+08:00",
+  "source_version": "0.2.1",
+  "archive": "伴屏-v0.2.1-公开源码.zip",
+  "archive_bytes": 221111,
+  "archive_sha256": "6d04a36264226328668ad37cce3e9dc838b82ec19baa8378ca166668d31c51da",
+  "entries": [
+    {
+      "path": ".gitignore",
+      "size": 218,
+      "sha256": "eb32a5536c960d6e0b1644c03779efd0486b004ed9f980f56299e1ae470ccd24"
+    },
+    {
+      "path": "AGENTS.md",
+      "size": 5607,
+      "sha256": "e44875554310b577ed2215c7785b1526e3a002ad5efeb2d659836b812418f3d1"
+    },
+    {
+      "path": "README-PUBLIC-WINDOWS.txt",
+      "size": 1714,
+      "sha256": "61718a9341a8b9db42e8431886da76681554756e22ec6d50f51d9e5b129123e4"
+    },
+    {
+      "path": "README-WINDOWS.txt",
+      "size": 1054,
+      "sha256": "33a7fd49bd9cdb39605c71699224fe1197e1d4b6a7308261e3350c73740f722b"
+    },
+    {
+      "path": "README.md",
+      "size": 5602,
+      "sha256": "90abbcd74b2339fc273ff0f5ac60b587e81d43d390f78c7a6baedfadc131e646"
+    },
+    {
+      "path": "apps/desktop/character.html",
+      "size": 304,
+      "sha256": "829eb3a269801983d7acdf634753b765ab86c34f3f8e3fbc6af496c1098451bc"
+    },
+    {
+      "path": "apps/desktop/electron/agent-runtime.fixture.cjs",
+      "size": 22585,
+      "sha256": "03c74de54cc8561ab2d83e0e548b4bc3798c13853bac019ddedad9ccbace683a"
+    },
+    {
+      "path": "apps/desktop/electron/agent-runtime.ts",
+      "size": 30212,
+      "sha256": "88fbb5aac5243bfc32e8290950c0ce5f16151ab9ec0ff23cc11ee208ed60d282"
+    },
+    {
+      "path": "apps/desktop/electron/main.ts",
+      "size": 29808,
+      "sha256": "f46e5d7b4f85c5ce29b4f0f879cfe4196e4aed4a072e97eeab127c8fcd6ba1a7"
+    },
+    {
+      "path": "apps/desktop/electron/model-config.ts",
+      "size": 10928,
+      "sha256": "5e631fdae5e30cb7f4bc7241808ebdae81175b16bb70e54a2ce98a8d18587422"
+    },
+    {
+      "path": "apps/desktop/electron/preload.ts",
+      "size": 6277,
+      "sha256": "f3ee0d830af175746410c1e066acab3739cedaa79c7e3012847a36cd74546b2b"
+    },
+    {
+      "path": "apps/desktop/electron/screen-capture.ts",
+      "size": 5299,
+      "sha256": "6aa2a4bd73ae175d995e3af3e8b9471badd591e56a9a58420d2f0691d45ffe7e"
+    },
+    {
+      "path": "apps/desktop/electron/screen-tool.ts",
+      "size": 1778,
+      "sha256": "ae77beb03c4cf105b9e6101d14f15f0c287c36cc1e8e011ced584070eb32b7c6"
+    },
+    {
+      "path": "apps/desktop/electron/window-layout.ts",
+      "size": 5684,
+      "sha256": "ea40fe9d8586f56735cbab1ea176cdb3c2464f7082bac05e4c2695d117f57a52"
+    },
+    {
+      "path": "apps/desktop/src/character/CharacterApp.tsx",
+      "size": 101,
+      "sha256": "7b0cd2bbb659360e3dc2dbce8f616c96650f854f9c41d955ef16e05f5682879f"
+    },
+    {
+      "path": "apps/desktop/src/character/OriginalCharacter.tsx",
+      "size": 1473,
+      "sha256": "ad082744d97f481835611fb1c131341f42a71fae8bc5b72ff31ccc834b4da323"
+    },
+    {
+      "path": "apps/desktop/src/character/StudyCharacter.tsx",
+      "size": 2035,
+      "sha256": "5f34dbd0eb6947f948f65140ca6ca9c735feb6783575690d24737d622b866807"
+    },
+    {
+      "path": "apps/desktop/src/character/character.css",
+      "size": 1742,
+      "sha256": "6c12550bb6c3048bb5fd7f8f2d436c7721ecfa94bd8633dc5366b6ff20abe434"
+    },
+    {
+      "path": "apps/desktop/src/character/grok.d.ts",
+      "size": 697,
+      "sha256": "01429245f81d6f7ffa9d48fa149837d5760148ddf8abd088bc9adc6a12cf474e"
+    },
+    {
+      "path": "apps/desktop/src/character/main.tsx",
+      "size": 476,
+      "sha256": "7f5d36942b3520b6f5dc7fa51c72d0fa8f9f477442970cef4db0a74de7c50072"
+    },
+    {
+      "path": "apps/desktop/src/character/study-loader.ts",
+      "size": 3789,
+      "sha256": "fd7ec12f46459e5c9b15977e6ce51d4617b3d5a1a69936dd452bf8cbba7fd10b"
+    },
+    {
+      "path": "apps/desktop/src/character/study-map.ts",
+      "size": 378,
+      "sha256": "baa0c40fc68484e5acd493cd9b98ea87a5b790e18f67e2dd1cda43c2e671ceec"
+    },
+    {
+      "path": "apps/desktop/src/character/types.ts",
+      "size": 995,
+      "sha256": "a7667dd36bc55e2f9608dd2766a5b4a48e8c8689fd4639acf27dd6d71a25c6f1"
+    },
+    {
+      "path": "apps/desktop/src/demo/AgentConversation.tsx",
+      "size": 10856,
+      "sha256": "1f44dc40fcfe0d931e3f4de1edb0384d4d6e672a0fa54eeee880deef24a203c4"
+    },
+    {
+      "path": "apps/desktop/src/demo/CompanionCharacter.tsx",
+      "size": 703,
+      "sha256": "f80918e8440247778d80b4838dd28c31219390e49184d6e5f170a6c0a8a0f48b"
+    },
+    {
+      "path": "apps/desktop/src/demo/DemoApp.tsx",
+      "size": 9589,
+      "sha256": "e831b339823b07c7e045dabd79c1da342ca99e7c05f46fb2eafa0e735c7e9312"
+    },
+    {
+      "path": "apps/desktop/src/demo/DemoPanels.tsx",
+      "size": 18054,
+      "sha256": "7e5f8718194197872010996019bb84c42ad850d56fac30664816f8274bbded12"
+    },
+    {
+      "path": "apps/desktop/src/demo/DisplaySettings.tsx",
+      "size": 2229,
+      "sha256": "f8b9a415c2414fb7150df674fade666a183dc988bff61f494b91920e680bc00e"
+    },
+    {
+      "path": "apps/desktop/src/demo/DotPet.tsx",
+      "size": 3146,
+      "sha256": "b69c1028de35a3adc6ff2bcf8d8208ac3ee3af4d5d0f1df5c4dda95caa1a76c7"
+    },
+    {
+      "path": "apps/desktop/src/demo/FeaturePanel.tsx",
+      "size": 25185,
+      "sha256": "1a8e6e04d554659e5dcd943ce2b3ff88d05dc2cb85d400fe6663eb62a7e059b1"
+    },
+    {
+      "path": "apps/desktop/src/demo/Icon.tsx",
+      "size": 1828,
+      "sha256": "98251432b4c4726c82aaa57beb44a8faf288e1a92fd6f161e5a5e1cbda06c747"
+    },
+    {
+      "path": "apps/desktop/src/demo/MessageContent.tsx",
+      "size": 5124,
+      "sha256": "fa0b66badd386525323afd17a64dbce0349ba0035488c49bc5055422f9b248f6"
+    },
+    {
+      "path": "apps/desktop/src/demo/ModelSettings.tsx",
+      "size": 14287,
+      "sha256": "db495122f01631d274bfb463476c37cb3eba3fa1c6493809992d1ede81b3b83a"
+    },
+    {
+      "path": "apps/desktop/src/demo/ScreenCanvas.tsx",
+      "size": 4950,
+      "sha256": "9d0e49e5dfc26a40407b7e82807b9cf381a42d43af5ac4589facebb5ba1a5918"
+    },
+    {
+      "path": "apps/desktop/src/demo/TaskCanvas.tsx",
+      "size": 33554,
+      "sha256": "bae8210e1a68ef388cb001452b515c73490c6f9aec0b9e22450027038d997486"
+    },
+    {
+      "path": "apps/desktop/src/demo/demo.css",
+      "size": 35071,
+      "sha256": "87bb0316eff2c7038b66f53b63fb7184eae77080952226d24466efc15921451b"
+    },
+    {
+      "path": "apps/desktop/src/demo/desktop.d.ts",
+      "size": 3160,
+      "sha256": "b6c633d56d3a105560f50151163d2fa8ebcd2a24b85863ab5e450085e03a2a9c"
+    },
+    {
+      "path": "apps/desktop/src/demo/dot-pet.css",
+      "size": 4723,
+      "sha256": "502e0c39b3ac08c66c734f74d63b0f4420ef08817e194702d86c5ed773425bf4"
+    },
+    {
+      "path": "apps/desktop/src/demo/intent.ts",
+      "size": 8987,
+      "sha256": "9596b1aa77436c5755a729639ab8fb264f28013f9a4d8f80e9a22468cff5a2b9"
+    },
+    {
+      "path": "apps/desktop/src/demo/local-store.ts",
+      "size": 13435,
+      "sha256": "75e21caaec48e89ee486ecc8717724578d82b8b9884b2e65415d63359108d894"
+    },
+    {
+      "path": "apps/desktop/src/demo/screen-text.ts",
+      "size": 1808,
+      "sha256": "9464ab160db97e573b3b60271faf2298f68ea60187025d9dd0d5cf9a32ffcf71"
+    },
+    {
+      "path": "apps/desktop/src/demo/usePetDrag.ts",
+      "size": 2442,
+      "sha256": "741cc8d9f15b308cbbbc39f96539eda9b78e1744de38f20a47749b41d8aadda9"
+    },
+    {
+      "path": "apps/desktop/tsconfig.electron.json",
+      "size": 312,
+      "sha256": "d9c0945af322e5cfce1c1dd05ea212d8143d8fa3b858e1dfa799351115016581"
+    },
+    {
+      "path": "apps/desktop/tsconfig.json",
+      "size": 294,
+      "sha256": "df53d717d1c875782113574b2a82d2f6689999cf18569d1bfde0b5cd20c3ffe6"
+    },
+    {
+      "path": "apps/desktop/vite.config.mts",
+      "size": 3739,
+      "sha256": "ab9fb7e3015b3a5cc7fa61d4acb078006331438d61f42dda3e9a0ebd16de49d3"
+    },
+    {
+      "path": "build.cmd",
+      "size": 976,
+      "sha256": "c03bd8910e523eb22072d5b28fd18861428a4ca6769ffa6a76ff1a06a3d98933"
+    },
+    {
+      "path": "dev.cmd",
+      "size": 875,
+      "sha256": "19db8bfb0d63a7c5b9188bfe804138a4a00026a85998872d60daca11612363e0"
+    },
+    {
+      "path": "docs/00-plan-and-acceptance.md",
+      "size": 5900,
+      "sha256": "1d2b4224dae9cd4dd12aa091a3dae670b46c61ef9cc813dd44d78a035f20ecfa"
+    },
+    {
+      "path": "docs/01-desktop-companion.md",
+      "size": 28918,
+      "sha256": "bd1aace99c7f99bdda58c7f02ee8993b827b8495ec624b21998b3c115c3ce9ce"
+    },
+    {
+      "path": "docs/02-product-references.md",
+      "size": 9042,
+      "sha256": "a2a04baa29524d91b8710695528da5067570d106d51f843f5cd806c87fc98a57"
+    },
+    {
+      "path": "docs/03-frontend-tasks.md",
+      "size": 25669,
+      "sha256": "2dcfc25226e4657f1180d5e9a3ee0d5774e539c4407a79879505c99000a38f89"
+    },
+    {
+      "path": "docs/04-dot-demo.md",
+      "size": 7054,
+      "sha256": "b333bd2dfca8e7a7447cdfb24a321d3a88826f3abdf890f9b6abe7bf6f7ab4ee"
+    },
+    {
+      "path": "docs/05-session-summary-2026-10-20.md",
+      "size": 10737,
+      "sha256": "9322411893dbda5a18597674d4042052ab89ad3200fab94b393fa2144c73181a"
+    },
+    {
+      "path": "docs/06-v0.2-implementation.md",
+      "size": 11425,
+      "sha256": "848dcf8ed7ec3c47c03edb72a1f9b8cbd7f1768b3b6a9fb1e5e9c2152bfc30d9"
+    },
+    {
+      "path": "docs/07-public-submission.md",
+      "size": 1866,
+      "sha256": "d412b406613737095596451a647433f94eb53918c8056a52d3b08818b5a5c79e"
+    },
+    {
+      "path": "docs/archive/00-plan-v0.1.md",
+      "size": 26334,
+      "sha256": "8dbfcc2b639d0804777eeb81491707a0f2e818903005b238250d6d72fcfc26a2"
+    },
+    {
+      "path": "docs/third-party.md",
+      "size": 5060,
+      "sha256": "0db5d796862df19681e1da818ebb22673234b69a41f2da185316088a961c4bac"
+    },
+    {
+      "path": "package-lock.json",
+      "size": 34421,
+      "sha256": "2579b164b9cc8a696be11c94a1347a875d96ffc27d583d0d22ee22bb26e13e35"
+    },
+    {
+      "path": "package.json",
+      "size": 2089,
+      "sha256": "9cb977a3e372190c248f2f78569cb243c6652f2a0bc3ec0d322e31e7c8c81d2c"
+    },
+    {
+      "path": "scripts/README-LOCAL-WINDOWS.txt",
+      "size": 1087,
+      "sha256": "6a82d2d599ba36746c29e2701e76f66719d422ade80aea5d2cff543677980c82"
+    },
+    {
+      "path": "scripts/agent-ui-fixture.mjs",
+      "size": 2499,
+      "sha256": "20b49b4f8348d93ecaad7b2fce671a4cd96060277bea25eefec529c978a09163"
+    },
+    {
+      "path": "scripts/check-local-character.cjs",
+      "size": 2578,
+      "sha256": "f81ab37c7887bd7c1477e539b9b67c131d1cc39e8fd5251fef8b08c78e4005c7"
+    },
+    {
+      "path": "scripts/check-no-vendor.mjs",
+      "size": 2170,
+      "sha256": "10a9e507d8dbfd5d3bd2c76cd606f5bd8271db055eb237692e6681e4d85bf8b8"
+    },
+    {
+      "path": "scripts/dev.mjs",
+      "size": 5722,
+      "sha256": "cbf42cffcf788e9d8983255a2ad2834334b4f4c8e36e5b6488e9334d76d444ec"
+    },
+    {
+      "path": "scripts/local-character.mjs",
+      "size": 1776,
+      "sha256": "0ce6e1b086cfe4009b80a3536bdf906438dfd7631cd3fd521af506382802bcb6"
+    },
+    {
+      "path": "scripts/package-demo.mjs",
+      "size": 8717,
+      "sha256": "168479193d908a7aeb405a43ba4de285ccdd5ea8a4c85bbc7f0bbac69eabe3d3"
+    },
+    {
+      "path": "scripts/package-local.mjs",
+      "size": 12339,
+      "sha256": "f1dbbb637eebc375c8a9cbc9ea715ca01ba24b94f21fd8a0fd26a80eb3e9531a"
+    },
+    {
+      "path": "scripts/test-intent.mjs",
+      "size": 6632,
+      "sha256": "11b1d611821cad48e109768e57ac6c4d2dbc1a81a99601c722fa6a0f0fb3a27f"
+    },
+    {
+      "path": "scripts/test-window-layout.mjs",
+      "size": 6592,
+      "sha256": "c9550b9d286b57843c00444447fbbe4845c136fe72ae2b23d3fd85dcc2322054"
+    },
+    {
+      "path": "scripts/validate-desktop.mjs",
+      "size": 23725,
+      "sha256": "ce4e4c30e6e8f7f80d4caf8dd7de46eae7404fc790e7f17203b1d572c084c7c3"
+    },
+    {
+      "path": "tsconfig.base.json",
+      "size": 391,
+      "sha256": "482ef036cff01d1a66e0cd1e49dd146b3d427842306632679e23c054877622e6"
+    },
+    {
+      "path": "公开构建说明.txt",
+      "size": 3101,
+      "sha256": "63feeb3066cd55bcc9ee4dcf94a30ed44ef19c6c51868627e22e6ff3d7a7ed94"
+    }
+  ],
+  "checks": {
+    "zip_crc": "passed",
+    "entry_count": 72,
+    "sha256_each_entry": "passed",
+    "path_allowlist": "passed",
+    "user_path_and_private_key_patterns": "passed",
+    "non_empty_api_key_literals": "Only fixture-private-key is present in the explicit test fixture; no real credential is included."
+  },
+  "excluded": [
+    "vendor",
+    "NOTICE.local.md",
+    "node_modules",
+    "all dist outputs",
+    "all outputs",
+    "profiles",
+    ".env*",
+    "real credentials",
+    "original character media/engine/geometry",
+    "raw screenshots",
+    "conversation data"
+  ],
+  "note": "No live desktop EXE is distributed. Only project-authored optional loaders reference local study files. This check is a concrete allowlist/content scan, not a claim of exhaustive secret detection."
+}

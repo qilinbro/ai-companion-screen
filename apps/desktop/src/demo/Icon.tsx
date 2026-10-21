@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react';
 
-export type IconName = 'arrow' | 'memory' | 'activity' | 'settings' | 'minus' | 'close' | 'sun' | 'spark' | 'leaf' | 'back' | 'copy' | 'check' | 'expand' | 'chevron';
+export type IconName = 'arrow' | 'memory' | 'activity' | 'settings' | 'minus' | 'close' | 'sun' | 'spark' | 'leaf' | 'back' | 'copy' | 'check' | 'expand' | 'restore' | 'chevron';
 const paths: Record<IconName, React.ReactNode> = {
   arrow: <><path d="M12 19V5M6 11l6-6 6 6" /></>,
   memory: <><path d="M8 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-2M8 3v5l4-2 4 2V3H8Z" /><path d="M8 13h8M8 17h5" /></>,
@@ -15,6 +15,7 @@ const paths: Record<IconName, React.ReactNode> = {
   copy: <><rect x="8" y="8" width="12" height="13" rx="2" /><path d="M15 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3" /></>,
   check: <path d="m5 12 4 4L19 6" />,
   expand: <><path d="M8 3H3v5M16 3h5v5M3 16v5h5M21 16v5h-5" /></>,
+  restore: <><path d="M3 8h5V3M16 3v5h5M3 16h5v5M21 16h-5v5" /></>,
   chevron: <path d="m9 5 7 7-7 7" />,
 };
 

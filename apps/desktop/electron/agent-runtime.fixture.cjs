@@ -2,10 +2,12 @@
 // listening server, or real screen data are used by this test.
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const { AgentRuntime, readChatCompletion } = require('../dist-electron/agent-runtime.js');
+const { AgentRuntime, readChatCompletion, checkModelConnection } = require('../dist-electron/agent-runtime.js');
+const { ModelConfigStore, normalizeModelBaseUrl } = require('../dist-electron/model-config.js');
 
 const CONFIG = { baseUrl: 'http://127.0.0.1:11434/v1', modelId: 'fixture-model', apiKey: '', allowScreen: true };
 const PNG = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jxl8AAAAASUVORK5CYII=';
+const CHANGED_PNG = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=';
 const captureResult = (requestId) => ({ requestId, dataUrl: `data:image/png;base64,${PNG}`, mimeType: 'image/png', width: 1, height: 1, displayLabel: 'fixture display', capturedAt: '2026-10-20T10:00:00.000Z' });
 const event = (delta, finish_reason = null) => `data: ${JSON.stringify({ choices: [{ index: 0, delta, finish_reason }] })}\r\n\r\n`;
 function streamResponse(source, fragment = true) {
@@ -87,6 +89,7 @@ for (const [label, permission, prompt, name, args, expected] of [
   ['English screen denial', true, 'Please do not capture my desktop. Explain EADDRINUSE.', 'capture_screen', '{}', 'screen_not_allowed'],
   ['unsupported tool', true, '看看当前页面', 'run_shell', '{}', 'unsupported_tool'],
   ['unexpected tool arguments', true, '看看当前页面', 'capture_screen', '{"command":"anything"}', 'invalid_arguments'],
+  ['missing JSON tool arguments', true, '看看当前页面', 'capture_screen', '', 'invalid_arguments'],
 ]) test(`${label} returns a restricted tool error without capture or image upload`, async () => {
   const requests = [];
   let count = 0;
@@ -127,7 +130,7 @@ test('a remote endpoint without project credentials is rejected before fetch', a
 test('provider errors never expose server body or credentials', async () => {
   const h = harness({ fetch: async () => new Response('SECRET_PROVIDER_BODY', { status: 401 }) });
   const result = await h.run('你好');
-  assert.equal(result.code, 'provider_error');
+  assert.equal(result.code, 'authentication');
   assert.ok(!JSON.stringify(h.events).includes('SECRET_PROVIDER_BODY'));
 });
 
@@ -197,4 +200,154 @@ test('JSON-compatible fallback returns actual provider text', async () => {
   const h = harness({ fetch: async () => new Response(JSON.stringify({ choices: [{ index: 0, message: { role: 'assistant', content: 'JSON 回答' }, finish_reason: 'stop' }] }), { headers: { 'content-type': 'application/json' } }) });
   assert.equal((await h.run('你好')).finishReason, 'completed');
   assert.equal(h.events.filter((e) => e.type === 'delta').map((e) => e.delta).join(''), 'JSON 回答');
+});
+
+test('a new screen question captures a fresh image, without replaying the old image', async () => {
+  let sequence = 0;
+  let captures = 0;
+  const requests = [];
+  const h = harness({
+    fetch: async (_url, init) => { requests.push(JSON.parse(init.body)); return sequence++ % 2 === 0 ? tools() : answer('刚才的新画面。'); },
+    capture: async (id) => ({ ...captureResult(id), capturedAt: `2026-10-21T00:00:0${++captures}.000Z`, dataUrl: `data:image/png;base64,${captures === 1 ? PNG : CHANGED_PNG}` }),
+  });
+  await h.run('看当前画面', 'screen_before', 'same');
+  await h.run('画面变了，再看看', 'screen_after', 'same');
+  assert.equal(captures, 2);
+  assert.ok(!JSON.stringify(requests[2]).includes('image_url'));
+  assert.notEqual(requests[1].messages.at(-1).content[1].image_url.url, requests[3].messages.at(-1).content[1].image_url.url);
+});
+
+test('revoking consent while waiting for the model prevents a subsequent tool read', async () => {
+  const requests = [];
+  const h = harness({ fetch: async (_url, init) => { requests.push(JSON.parse(init.body)); h.configure({ ...CONFIG, allowScreen: false }); return requests.length === 1 ? tools() : answer('缺少授权。'); } });
+  await h.run('看一下画面');
+  assert.equal(h.captures(), 0);
+  assert.equal(JSON.parse(requests[1].messages.find((message) => message.role === 'tool').content).error, 'screen_not_allowed');
+});
+
+test('revocation while pixels are acquired discards them before preview and model upload', async () => {
+  const requests = [];
+  let sequence = 0;
+  const h = harness({
+    capture: async (id) => { h.configure({ ...CONFIG, allowScreen: false }); return captureResult(id); },
+    fetch: async (_url, init) => { requests.push(JSON.parse(init.body)); return sequence++ === 0 ? tools() : answer('没有收到图片。'); },
+  });
+  await h.run('看看画面');
+  assert.ok(!JSON.stringify(requests).includes('image_url'));
+  assert.ok(!h.events.some((item) => item.type === 'capture'));
+  assert.equal(JSON.parse(requests[1].messages.find((message) => message.role === 'tool').content).error, 'screen_not_allowed');
+});
+
+test('late capture after stopping cannot upload, emit preview, or change the next turn', async () => {
+  let resolveCapture;
+  let sequence = 0;
+  const requests = [];
+  const h = harness({
+    capture: (id) => new Promise((resolve) => { resolveCapture = () => resolve(captureResult(id)); }),
+    fetch: async (_url, init) => { requests.push(JSON.parse(init.body)); return sequence++ === 0 ? tools() : answer('新回复。'); },
+  });
+  h.runtime.start({ requestId: 'late_capture', prompt: '看屏幕' });
+  for (let attempt = 0; attempt < 100 && !resolveCapture; attempt += 1) await new Promise((resolve) => setTimeout(resolve, 2));
+  assert.ok(resolveCapture);
+  h.runtime.cancel('late_capture');
+  await h.run('文字新任务', 'new_after_capture');
+  resolveCapture();
+  await new Promise((resolve) => setTimeout(resolve, 5));
+  assert.ok(!h.events.some((item) => item.requestId === 'late_capture' && item.type === 'capture'));
+  assert.equal(requests.length, 2);
+  assert.ok(!JSON.stringify(requests).includes('image_url'));
+});
+
+test('partial tool calls and unknown finish statuses never execute capture', async () => {
+  for (const finish of ['length', 'stop', 'unknown']) {
+    const h = harness({ fetch: async () => streamResponse(event({ tool_calls: [{ index: 0, id: 'partial', type: 'function', function: { name: 'capture_screen', arguments: '{}' } }] }) + event({}, finish)) });
+    assert.equal((await h.run('看屏幕')).type, 'error');
+    assert.equal(h.captures(), 0);
+  }
+});
+
+test('network interruption after a delta ends once without committing a completed turn', async () => {
+  const requests = [];
+  let sequence = 0;
+  const h = harness({ fetch: async (_url, init) => {
+    requests.push(JSON.parse(init.body));
+    if (sequence++ > 0) return answer('恢复后回复。');
+    return new Response(new ReadableStream({ start(controller) {
+      controller.enqueue(new TextEncoder().encode(event({ content: '部分回复' })));
+      setTimeout(() => controller.error(new Error('fixture network down')), 3);
+    } }), { headers: { 'content-type': 'text/event-stream' } });
+  } });
+  assert.equal((await h.run('第一轮', 'disconnect', 'same')).code, 'connection_error');
+  await h.run('重新发送', 'reconnect', 'same');
+  assert.equal(requests[1].messages.length, 2);
+  assert.equal(h.events.filter((item) => item.requestId === 'disconnect' && ['done', 'error'].includes(item.type)).length, 1);
+});
+
+test('a provider HTML page is a format error rather than a completed model response', async () => {
+  const h = harness({ fetch: async () => new Response('<html>SECRET</html>', { headers: { 'content-type': 'text/html' } }) });
+  assert.equal((await h.run('你好')).code, 'invalid_response');
+  assert.ok(!JSON.stringify(h.events).includes('SECRET'));
+});
+
+test('connection check confirms text, SSE and actual tool protocol without capturing', async () => {
+  const requests = [];
+  const result = await checkModelConnection(CONFIG, { fetch: async (_url, init) => { requests.push(JSON.parse(init.body)); return requests.length === 1 ? answer('你好。') : tools(); } });
+  assert.equal(result.ok, true);
+  assert.deepEqual(result.checks, { text: true, streaming: true, tools: true, vision: 'not_tested' });
+  assert.ok(!requests[0].tools);
+  assert.equal(requests[1].tool_choice.function.name, 'capture_screen');
+  assert.ok(!JSON.stringify(requests).includes('image_url'));
+});
+
+for (const [label, status, body, code] of [
+  ['authentication', 401, 'SECRET_CREDENTIAL_BODY', 'authentication'],
+  ['API path', 404, '<html>not found</html>', 'address'],
+  ['unknown model', 404, JSON.stringify({ error: { code: 'model_not_found' } }), 'model'],
+  ['tool capability', 400, JSON.stringify({ error: { message: 'tools are not supported by this model' } }), 'capability'],
+  ['quota', 429, 'SECRET_PROVIDER_BODY', 'provider_error'],
+]) test(`connection check classifies ${label} without exposing the provider error envelope`, async () => {
+  const result = await checkModelConnection(CONFIG, { fetch: async () => new Response(body, { status }) });
+  assert.equal(result.ok, false);
+  assert.equal(result.code, code);
+  assert.ok(!JSON.stringify(result).includes('SECRET'));
+  assert.equal(result.checks.vision, 'not_tested');
+});
+
+test('connection check distinguishes a text model ignoring forced tools', async () => {
+  const result = await checkModelConnection(CONFIG, { fetch: async () => answer('只提供文字。') });
+  assert.equal(result.code, 'capability');
+  assert.equal(result.checks.text, true);
+  assert.equal(result.checks.tools, false);
+});
+
+test('connection check reports non-streaming JSON support precisely', async () => {
+  let sequence = 0;
+  const result = await checkModelConnection(CONFIG, { fetch: async () => new Response(JSON.stringify({ choices: [{ index: 0, message: sequence++ === 0 ? { content: 'JSON reply' } : { tool_calls: [{ id: 'call_json', type: 'function', function: { name: 'capture_screen', arguments: '{}' } }] }, finish_reason: sequence === 1 ? 'stop' : 'tool_calls' }] }), { headers: { 'content-type': 'application/json' } }) });
+  assert.equal(result.code, 'capability');
+  assert.deepEqual(result.checks, { text: true, streaming: false, tools: true, vision: 'not_tested' });
+});
+
+test('connection check handles format, network, timeout and cancellation without provider text', async () => {
+  assert.equal((await checkModelConnection(CONFIG, { fetch: async () => new Response('not a chat API', { headers: { 'content-type': 'text/html' } }) })).code, 'invalid_response');
+  assert.equal((await checkModelConnection(CONFIG, { fetch: async () => { throw new Error('SECRET network info'); } })).code, 'network');
+  assert.equal((await checkModelConnection(CONFIG, { timeoutMs: 5, fetch: async () => new Promise(() => undefined) })).code, 'timeout');
+  const controller = new AbortController();
+  const pending = checkModelConnection(CONFIG, { signal: controller.signal, fetch: async () => new Promise(() => undefined) });
+  controller.abort();
+  assert.equal((await pending).code, 'cancelled');
+});
+
+test('connection settings use only this endpoint credential and never grant permission', () => {
+  const store = new ModelConfigStore('.fixture-never-written');
+  // In-memory fixture setup does not invoke safeStorage or write a credential.
+  store.runtime = { ...CONFIG, apiKey: 'fixture-private-key' };
+  const form = { baseUrl: CONFIG.baseUrl, modelId: 'another-model', persistKey: false, allowScreen: true };
+  const same = store.resolveForConnectionTest(form);
+  assert.equal(same.apiKey, 'fixture-private-key');
+  assert.equal(same.allowScreen, false);
+  assert.equal(store.resolveForConnectionTest({ ...form, baseUrl: 'https://example.test/v1' }).apiKey, '');
+  assert.equal(store.resolveForConnectionTest({ ...form, apiKey: '' }).apiKey, '');
+  assert.equal(store.getRuntime().allowScreen, true);
+  assert.ok(!JSON.stringify(store.getPublic()).includes('fixture-private-key'));
+  assert.equal(normalizeModelBaseUrl('https://example.test/v1/chat/completions'), 'https://example.test/v1');
 });

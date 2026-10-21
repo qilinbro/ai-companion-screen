@@ -22,7 +22,7 @@ export type SaveModelConfigInput = {
   allowScreen: boolean;
 };
 
-type RuntimeModelConfig = {
+export type RuntimeModelConfig = {
   baseUrl: string;
   modelId: string;
   apiKey: string;
@@ -214,6 +214,18 @@ export class ModelConfigStore {
 
   getRuntime(): RuntimeModelConfig {
     return { ...this.runtime };
+  }
+
+  /** Resolve an unsaved trusted settings form without persisting or granting screen access. */
+  resolveForConnectionTest(input: unknown): RuntimeModelConfig {
+    const data = parseInput(input);
+    return {
+      baseUrl: data.baseUrl,
+      modelId: data.modelId,
+      // A credential entered for another endpoint must never follow a changed URL.
+      apiKey: data.apiKey === undefined ? (data.baseUrl === this.runtime.baseUrl ? this.runtime.apiKey : '') : data.apiKey,
+      allowScreen: false,
+    };
   }
 
   async save(input: unknown): Promise<PublicModelConfig> {

@@ -1,0 +1,78 @@
+﻿伴屏 AI Companion Screen｜运行时与几何测试记录
+本次执行日期：2026-10-21（Asia/Shanghai）
+执行位置：工程根目录（绝对用户路径不公开）
+说明：以下为本次材料整理期间重新运行的既有测试；不调用真实模型，不是 AI 效果评测，也不是实体双屏验收。运行时夹具使用已编译主进程模块，几何测试读取并编译 window-layout.ts 后使用模拟显示器数据。各用例耗时仅是本次运行输出，不是性能基准。
+
+命令：node apps/desktop/electron/agent-runtime.fixture.cjs
+退出码：0
+✔ SSE reconstructs split UTF-8, CRLF, multiline frames and fragmented function calls (25.7896ms)
+✔ text-only response streams without any screen read (7.4265ms)
+✔ model chooses capture; real injected handler result is passed as metadata plus image input (5.8427ms)
+✔ no screen consent returns a restricted tool error without capture or image upload (4.4341ms)
+✔ explicit screen denial returns a restricted tool error without capture or image upload (2.2535ms)
+✔ screen not needed returns a restricted tool error without capture or image upload (3.2979ms)
+✔ direct do-not-capture returns a restricted tool error without capture or image upload (5.4848ms)
+✔ do-not-perform-capture returns a restricted tool error without capture or image upload (3.3619ms)
+✔ deferred desktop capture denied returns a restricted tool error without capture or image upload (11.3424ms)
+✔ polite screen denial returns a restricted tool error without capture or image upload (4.9528ms)
+✔ English screen denial returns a restricted tool error without capture or image upload (2.3856ms)
+✔ unsupported tool returns a restricted tool error without capture or image upload (7.731ms)
+✔ unexpected tool arguments returns a restricted tool error without capture or image upload (1.9493ms)
+✔ missing JSON tool arguments returns a restricted tool error without capture or image upload (3.8653ms)
+✔ cancellation suppresses late chunks and allows a new request (71.952ms)
+✔ a remote endpoint without project credentials is rejected before fetch (0.2469ms)
+✔ provider errors never expose server body or credentials (15.7014ms)
+✔ truncated SSE fails rather than claiming a completed answer (15.6497ms)
+✔ three provider rounds cap repeated model tool calls (2.9132ms)
+✔ deadline aborts a stalled stream with exactly one terminal event (27.2518ms)
+✔ multi-turn context is text only, bounded, and cleared across provider/model changes (123.22ms)
+✔ a completed screen turn never replays image or tool messages in the next turn (14.954ms)
+✔ stopping during capture cancels the screenshot and commits no assistant history (30.1635ms)
+✔ JSON-compatible fallback returns actual provider text (16.1982ms)
+✔ a new screen question captures a fresh image, without replaying the old image (5.3541ms)
+✔ revoking consent while waiting for the model prevents a subsequent tool read (2.2667ms)
+✔ revocation while pixels are acquired discards them before preview and model upload (4.6884ms)
+✔ late capture after stopping cannot upload, emit preview, or change the next turn (33.1081ms)
+✔ partial tool calls and unknown finish statuses never execute capture (46.4323ms)
+✔ network interruption after a delta ends once without committing a completed turn (46.951ms)
+✔ a provider HTML page is a format error rather than a completed model response (15.4056ms)
+✔ connection check confirms text, SSE and actual tool protocol without capturing (4.0056ms)
+✔ connection check classifies authentication without exposing the provider error envelope (0.265ms)
+✔ connection check classifies API path without exposing the provider error envelope (0.4518ms)
+✔ connection check classifies unknown model without exposing the provider error envelope (0.3277ms)
+✔ connection check classifies tool capability without exposing the provider error envelope (0.3073ms)
+✔ connection check classifies quota without exposing the provider error envelope (0.1638ms)
+✔ connection check distinguishes a text model ignoring forced tools (2.6106ms)
+✔ connection check reports non-streaming JSON support precisely (0.4698ms)
+✔ connection check handles format, network, timeout and cancellation without provider text (6.5215ms)
+✔ connection settings use only this endpoint credential and never grant permission (0.5481ms)
+ℹ tests 41
+ℹ suites 0
+ℹ pass 41
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 586.3992
+
+命令：node scripts/test-window-layout.mjs
+退出码：0
+✔ all three modes fit available work areas and taskbars in DIP (0.8181ms)
+✔ selecting output from input leaves the pet and input on their own screen (0.8882ms)
+✔ expanding input at an edge never overwrites the logical pet anchor (0.2569ms)
+✔ canvas movement and fullscreen preserve independent pet and normal bounds (0.16ms)
+✔ each monitor restores its own canvas placement after switching (0.1234ms)
+✔ unplugged fullscreen canvas falls back visibly and reconnects to its preferred monitor (0.2466ms)
+✔ a pet from a disconnected display is clamped onto a remaining display (0.1675ms)
+✔ scaling and taskbar changes clamp saved bounds without applying pixel ratios (0.1594ms)
+✔ tiny work areas shrink every mode and oversize dragged windows remain visible (0.1386ms)
+✔ unavailable and malformed display choices are rejected without moving output (0.5329ms)
+✔ collapsing a fullscreen canvas clears fullscreen but keeps its output preference (0.1284ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 8.6628
