@@ -1,15 +1,23 @@
 # 伴屏 AI Companion Screen
 
-随叫随到的 Windows 桌面 AI 伙伴。平时安静待机，点击展开小输入框，发送需求后进入单张工作画布。沿用 Electron、React 与 TypeScript，当前版本 v0.2.1。
+随叫随到的 Windows 桌面 AI 伙伴。平时安静待机，点击展开小输入框，发送需求后进入单张工作画布。沿用 Electron、React 与 TypeScript，当前版本 v0.2.2。
+
+## 下载 v0.2.2 Windows 便携版
+
+[下载 Windows x64 运行包](https://github.com/qilinbro/ai-companion-screen/releases/download/v0.2.2/banping-v0.2.2-win-x64.zip) · [发行说明与校验文件](https://github.com/qilinbro/ai-companion-screen/releases/tag/v0.2.2)
+
+建议解压到较短路径。完整解压后，运行“首次连接原角色.exe”，选择自己已有的伴屏工作区。角色留在原目录，连接后使用原黑色角色及原动作；以后直接双击“伴屏.exe”。无需安装 Node.js、打开终端或每次编译。
+
+公开 ZIP 不附第三方原角色、不含密钥及个人配置。尚未连接时有可点击的文字入口和完整聊天画布，没有备用宠物。需自行持有有权使用的角色素材；连接后生成的本机位置文件不要重新公开上传。[运行包说明](README-RELEASE-WINDOWS.txt) · [构建与验证记录](docs/09-v0.2.2-release.md)。
 
 ## 当前角色与源码
 
 当前本机入口统一使用原黑色角色，已删除奶油造型及加载失败时的备用角色。缺少素材时明确提示，不自动更换宠物。
 
-- [最新黑色角色统一源码与验证](showcase/black-character-update-2026-10-21/README.md)
-- [下载最新公开源码](showcase/black-character-update-2026-10-21/banping-black-character-source.zip)
+- [此前黑色角色统一源码与验证快照](showcase/black-character-update-2026-10-21/README.md)
+- [下载此前公开源码快照](showcase/black-character-update-2026-10-21/banping-black-character-source.zip)
 
-原角色及新录制的奶茶生活演示、宠物 GIF 仅在本机提供，不在公开仓库分发。
+最新版源码可从本页 Code 下载或从 v0.2.2 标签获取。原角色及新录制的奶茶生活演示、宠物 GIF 仅在本机提供，不在公开仓库分发。
 
 ## 较早公开展示材料（历史快照）
 
@@ -40,13 +48,16 @@ npm run build:public
 npm run desktop:public:start
 ```
 
-公开便携封装：
+v0.2.2 运行包的可复现构建（构建机器需要已有原角色工作区；素材不会进入运行包）：
 
 ```bash
-npm run desktop:public:package
+npm run desktop:release:package
+npm run build:public
+node scripts/build-character-connector.mjs
+node scripts/prepare-release.mjs
 ```
 
-输出 `outputs/伴屏-Demo-win32-x64/伴屏 Demo.exe`，分享时保留整个运行目录及依赖许可证。本次提交提供可复现源码，没有重新生成或交付该公开 EXE；新构建须另做启动与交互验证。默认 `build`、`desktop:start`、`desktop:package` 和 `test:portable` 均为本机黑色成品流程，公开校验请使用上述显式入口。
+输出 `outputs/releases/v0.2.2/banping-v0.2.2-win-x64.zip`。Windows 自带 .NET Framework 编译原生连接助手；连接后沿用所选工作区的本机配置目录。旧 `desktop:public:package` 命令仍用于仅校验无素材 Demo，完整运行包请使用以上命令。
 
 ## 使用
 
@@ -60,7 +71,7 @@ npm run desktop:public:package
 
 ## 验证与边界
 
-运行时 41 项、几何 11 项通过，公开源码干净解压构建通过。另有既有本机 EXE 30 项原生受控报告；其中角色检查属于本机版本，不等于公开构建 30 项验收。默认启动链另有 8 项实际桌面检查通过，三种状态均显示原黑色角色；旧角色资源备份已清理。新视频覆盖输入、流式、上翻、设置、单屏全屏、按钮退出及停止，未声称本轮视频完成 Esc 或复制点击检查。
+v0.2.2 本次运行时 41 项、几何 11 项、新本机 EXE 角色检查 12 项、连接助手核心逻辑 22 项通过；公开与本机渲染构建均通过。实际 ZIP 解压后的新 EXE 16 项检查通过，覆盖未连接入口与连接原角色后三种状态；ZIP 完整性与摘要检查通过。连接助手图形选择/取消仍待人工验收，核心绑定逻辑已测。另有既有本机 EXE 30 项原生受控报告；其中角色检查属于本机版本，不等于公开构建 30 项验收。默认启动链另有 8 项实际桌面检查通过，三种状态均显示原黑色角色；旧角色资源备份已清理。新视频覆盖输入、流式、上翻、设置、单屏全屏、按钮退出及停止，未声称本轮视频完成 Esc 或复制点击检查。
 
 真实视觉服务及型号未提供。真实模型效果、实体双屏、混合缩放、拔插、物理睡眠和部分人工桌面回归仍待验收。几何模拟和受控协议回复不能替代真实设备与模型结果。
 
@@ -75,6 +86,7 @@ npm run test:desktop
 
 桌面测试使用隔离资料及本机受控服务，会显示真实窗口，可能使用剪贴板和采集测试主屏。测试不调用外部模型。
 
+- [v0.2.2 打包记录](docs/09-v0.2.2-release.md) / [便携运行包使用说明](README-RELEASE-WINDOWS.txt)
 - [公开 Windows 构建说明](README-PUBLIC-WINDOWS.txt)
 - [v0.2 实现与验收记录](docs/06-v0.2-implementation.md)
 - [公开展示材料记录](docs/07-public-submission.md) / [黑色角色与生活演示](docs/08-life-demo-and-black-character.md)

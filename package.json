@@ -1,6 +1,6 @@
 {
   "name": "ai-companion-screen",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "private": true,
   "description": "伴屏 AI Companion Screen：Windows 电脑常伴 Agent（开发中）",
   "engines": {
@@ -27,7 +27,8 @@
     "test:portable": "node scripts/validate-desktop.mjs --packaged --local-desktop",
     "check:no-vendor": "node scripts/check-no-vendor.mjs",
     "build": "npm run typecheck && npm run desktop:build",
-    "build:public": "npm run typecheck && npm run desktop:public:build && npm run check:no-vendor"
+    "build:public": "npm run typecheck && npm run desktop:public:build && npm run check:no-vendor",
+    "desktop:release:package": "npm run typecheck && npm run desktop:local:build && node scripts/package-local.mjs --release"
   },
   "dependencies": {
     "react": "19.3.1",

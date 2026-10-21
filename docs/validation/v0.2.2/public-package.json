@@ -1,0 +1,148 @@
+{
+  "kind": "banping-v022-public-package-native-validation",
+  "date": "2026-10-21",
+  "scope": "Actual distribution ZIP SHA256 verified, extracted into a new isolated short Windows directory, file hashes matched staged package, and native EXE tested before and after binding. Separate empty profiles and own debugger ports. No model, screen capture, user profile or original app interaction.",
+  "checks": [
+    {
+      "项目": "actual distribution ZIP matches expected SHA256",
+      "通过": true,
+      "数据": {
+        "sha256": "d5d1b72406073bcc1201f54bf0a39206a008f7dea160b6ff2c848081200ceb9a"
+      }
+    },
+    {
+      "项目": "actual distribution ZIP extracts successfully",
+      "通过": true
+    },
+    {
+      "项目": "extracted actual ZIP matches staged package",
+      "通过": true,
+      "数据": {
+        "files": 144,
+        "bytes": 388791942
+      }
+    },
+    {
+      "项目": "public package has no prefilled machine binding",
+      "通过": true
+    },
+    {
+      "项目": "unbound uses independent packaged EXE and empty profile",
+      "通过": true,
+      "数据": {
+        "version": "0.2.2",
+        "isPackaged": true
+      }
+    },
+    {
+      "项目": "unbound public entry is visible without any substitute character",
+      "通过": true
+    },
+    {
+      "项目": "unbound entry opens input through native mouse events",
+      "通过": true
+    },
+    {
+      "项目": "unbound public canvas is usable",
+      "通过": true
+    },
+    {
+      "项目": "shipped connector binds only the isolated package without launching",
+      "通过": true
+    },
+    {
+      "项目": "connector writes expected binding to selected existing workspace",
+      "通过": true
+    },
+    {
+      "项目": "bound uses independent packaged EXE and empty profile",
+      "通过": true,
+      "数据": {
+        "version": "0.2.2",
+        "isPackaged": true
+      }
+    },
+    {
+      "项目": "bound idle has original character without substitute",
+      "通过": true,
+      "数据": {
+        "originalPaths": 9
+      }
+    },
+    {
+      "项目": "bound input has original character without substitute",
+      "通过": true,
+      "数据": {
+        "originalPaths": 9
+      }
+    },
+    {
+      "项目": "bound canvas has original character without substitute",
+      "通过": true,
+      "数据": {
+        "originalPaths": 9
+      }
+    },
+    {
+      "项目": "staged public package remains byte-for-byte unchanged",
+      "通过": true
+    },
+    {
+      "项目": "staged public package still has no machine binding",
+      "通过": true
+    }
+  ],
+  "states": [
+    {
+      "phase": "unbound",
+      "mode": "idle",
+      "originalPaths": 0,
+      "obsoleteCharacters": 0,
+      "homeVisible": true,
+      "unavailableText": "原角色未随附\n点击输入",
+      "inputVisible": false
+    },
+    {
+      "phase": "unbound",
+      "mode": "canvas",
+      "originalPaths": 0,
+      "obsoleteCharacters": 0,
+      "homeVisible": true,
+      "unavailableText": "原角色未随附\n点击输入",
+      "inputVisible": true
+    },
+    {
+      "phase": "bound",
+      "mode": "idle",
+      "originalPaths": 9,
+      "obsoleteCharacters": 0,
+      "homeVisible": true,
+      "unavailableText": "",
+      "inputVisible": false
+    },
+    {
+      "phase": "bound",
+      "mode": "input",
+      "originalPaths": 9,
+      "obsoleteCharacters": 0,
+      "homeVisible": true,
+      "unavailableText": "",
+      "inputVisible": true
+    },
+    {
+      "phase": "bound",
+      "mode": "canvas",
+      "originalPaths": 9,
+      "obsoleteCharacters": 0,
+      "homeVisible": true,
+      "unavailableText": "",
+      "inputVisible": true
+    }
+  ],
+  "passed": true,
+  "modelRequests": 0,
+  "screenCaptures": 0,
+  "total": 16,
+  "originalAppUntouched": true,
+  "extractionNote": "Deep nested Windows paths can exceed traditional path-length limits; this actual ZIP was fully extracted and launched from a shorter ordinary workspace directory."
+}

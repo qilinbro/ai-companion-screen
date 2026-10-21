@@ -1,0 +1,112 @@
+{
+  "kind": "banping-original-character-connector-checks",
+  "testScope": "Isolated stub workspace; no original scripts or user profiles copied; GUI not opened; no app launched.",
+  "checks": [
+    {
+      "name": "validate-only accepts ordinary workspace",
+      "passed": true,
+      "expectedExitCode": 0,
+      "exitCode": 0
+    },
+    {
+      "name": "validation creates no marker",
+      "passed": true
+    },
+    {
+      "name": "validation does not create a user profile",
+      "passed": true
+    },
+    {
+      "name": "bind-only writes valid marker without launching",
+      "passed": true,
+      "expectedExitCode": 0,
+      "exitCode": 0
+    },
+    {
+      "name": "marker is UTF-8 without BOM",
+      "passed": true
+    },
+    {
+      "name": "marker has exactly four expected fields",
+      "passed": true
+    },
+    {
+      "name": "marker schema and selected paths match",
+      "passed": true
+    },
+    {
+      "name": "bind creates no profile",
+      "passed": true
+    },
+    {
+      "name": "rebind atomically replaces ordinary marker",
+      "passed": true,
+      "expectedExitCode": 0,
+      "exitCode": 0
+    },
+    {
+      "name": "rebind selects new workspace",
+      "passed": true
+    },
+    {
+      "name": "no temporary marker files remain",
+      "passed": true
+    },
+    {
+      "name": "missing required script is rejected",
+      "passed": true,
+      "expectedExitCode": 2,
+      "exitCode": 2
+    },
+    {
+      "name": "invalid workspace does not alter marker",
+      "passed": true
+    },
+    {
+      "name": "workspace junction is rejected",
+      "passed": true,
+      "expectedExitCode": 2,
+      "exitCode": 2
+    },
+    {
+      "name": "workspace link does not alter marker",
+      "passed": true
+    },
+    {
+      "name": "nested character directory junction is rejected",
+      "passed": true,
+      "expectedExitCode": 2,
+      "exitCode": 2
+    },
+    {
+      "name": "nested link does not alter marker",
+      "passed": true
+    },
+    {
+      "name": "any package subtree junction is rejected",
+      "passed": true,
+      "expectedExitCode": 2,
+      "exitCode": 2
+    },
+    {
+      "name": "linked package receives no marker",
+      "passed": true
+    },
+    {
+      "name": "wrong package identity is rejected",
+      "passed": true,
+      "expectedExitCode": 2,
+      "exitCode": 2
+    },
+    {
+      "name": "wrong package receives no marker",
+      "passed": true
+    },
+    {
+      "name": "invalid CLI usage exits 64",
+      "passed": true
+    }
+  ],
+  "passed": true,
+  "total": 22
+}

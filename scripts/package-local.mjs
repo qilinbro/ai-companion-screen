@@ -8,8 +8,12 @@ import { fileURLToPath } from 'node:url';
 
 const root = fs.realpathSync(path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..'));
 const require = createRequire(import.meta.url);
+const args = process.argv.slice(2);
+const releaseBuild = args.length === 1 && args[0] === '--release';
+const manifest = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
 const outputRoot = path.join(root, 'outputs');
-const outputDir = path.join(outputRoot, '伴屏-win32-x64');
+const outputName = releaseBuild ? `banping-v${manifest.version}-win32-x64` : '伴屏-win32-x64';
+const outputDir = path.join(outputRoot, outputName);
 const appDir = path.join(outputDir, 'resources', 'app');
 const electronDir = path.join(root, 'node_modules', 'electron', 'dist');
 const runtimeModules = ['react', 'react-dom', 'scheduler'];
@@ -19,6 +23,10 @@ const runtimeFileNames = new Set(['electron.exe', 'chrome_100_percent.pak', 'chr
 const characterFiles = ['geometry-data.js', 'src/math.js', 'src/tables.js', 'src/pose.js', 'src/tricks.js', 'src/fx.js', 'src/eyes.js', 'src/character.js'];
 
 try {
+  if (args.length && !releaseBuild) throw new Error('仅支持不带参数或 --release；不接受自定义输出路径。');
+  if (typeof manifest.version !== 'string' || !/^\d+\.\d+\.\d+$/.test(manifest.version)) {
+    throw new Error('项目版本必须为固定的三段数字版本。');
+  }
   if (process.platform !== 'win32' || process.arch !== 'x64') {
     throw new Error('此脚本只支持当前 Windows x64 电脑。');
   }
@@ -32,7 +40,6 @@ try {
   const modules = runtimeModules.map(collectRuntimeModule);
   const electron = collectElectronRuntime();
   const instructions = fs.readFileSync(path.join(root, 'scripts', 'README-LOCAL-WINDOWS.txt'), 'utf8');
-  const manifest = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
 
   // Validate all sources and the exact target before replacing this script's
   // own output. Old demo packages and user profiles are outside this target.
@@ -196,7 +203,8 @@ function collectRuntimeModule(name) {
 }
 
 function assertSafeOutput() {
-  if (!path.isAbsolute(outputDir) || outputDir !== path.join(root, 'outputs', '伴屏-win32-x64') || path.dirname(outputDir) !== outputRoot || !isInside(root, outputDir)) {
+  const expectedName = releaseBuild ? `banping-v${manifest.version}-win32-x64` : '伴屏-win32-x64';
+  if (!path.isAbsolute(outputDir) || outputDir !== path.join(root, 'outputs', expectedName) || path.dirname(outputDir) !== outputRoot || !isInside(root, outputDir)) {
     throw new Error('输出路径不是本项目指定的本机应用目录。');
   }
   if (fs.existsSync(outputRoot)) assertOrdinaryDirectory(outputRoot);
