@@ -1,0 +1,399 @@
+{
+  "created_at": "2026-10-21T18:44:00+08:00",
+  "source_version": "0.2.1",
+  "archive": "伴屏-统一黑色角色-公开源码.zip",
+  "archive_bytes": 220228,
+  "archive_sha256": "0abdb0eb7cf2a748e8520021f0d444e5f1e6c5216e4f76e96f56d2aec63b185c",
+  "entry_count": 71,
+  "checks": {
+    "same_prior_allowlist": "passed",
+    "current_source_snapshot_complete": "passed",
+    "source_unchanged_during_packaging": "passed",
+    "prior_manifest_delta": {
+      "removed": [
+        "apps/desktop/src/character/OriginalCharacter.tsx",
+        "apps/desktop/src/demo/DotPet.tsx",
+        "apps/desktop/src/demo/dot-pet.css"
+      ],
+      "added": [
+        "apps/desktop/src/character/UnavailableCharacter.tsx",
+        "docs/08-life-demo-and-black-character.md"
+      ]
+    },
+    "zip_crc": "passed",
+    "sha256_each_entry": "passed",
+    "no_duplicate_or_traversal_paths": "passed",
+    "user_path_and_private_key_patterns": "passed",
+    "credential_note": "Explicit fixture-private-key test literals may remain in test fixtures; no real credential is included."
+  },
+  "excluded": [
+    "vendor",
+    "NOTICE.local.md",
+    "node_modules",
+    "all dist and outputs",
+    "profiles",
+    ".env*",
+    "real credentials",
+    "original character media/engine/geometry",
+    "raw screen images",
+    "conversation data"
+  ],
+  "validation_scope": "This packaging run verifies the source archive only; it does not rerun builds, models, tests or desktop interactions.",
+  "entries": [
+    {
+      "path": ".gitignore",
+      "bytes": 218,
+      "sha256": "eb32a5536c960d6e0b1644c03779efd0486b004ed9f980f56299e1ae470ccd24"
+    },
+    {
+      "path": "AGENTS.md",
+      "bytes": 5784,
+      "sha256": "6b695b612a10af27a597299a078bf217a21993b8962a12d8906e0e65f066ba69"
+    },
+    {
+      "path": "README-PUBLIC-WINDOWS.txt",
+      "bytes": 1870,
+      "sha256": "55334e7893f71d95532a2f67fb7d5abe09c8ea536af68e8555763cb61824dfac"
+    },
+    {
+      "path": "README-WINDOWS.txt",
+      "bytes": 1158,
+      "sha256": "2fa3bc19715cb9b3f585bef4f03f3a8e1705a5ff7f7aff3aac79d97c9d118c8e"
+    },
+    {
+      "path": "README.md",
+      "bytes": 5735,
+      "sha256": "408bf0fbd1e9aa18383affaf2ebded0522a847e6360011c663bd4882f53200e5"
+    },
+    {
+      "path": "apps/desktop/character.html",
+      "bytes": 304,
+      "sha256": "829eb3a269801983d7acdf634753b765ab86c34f3f8e3fbc6af496c1098451bc"
+    },
+    {
+      "path": "apps/desktop/electron/agent-runtime.fixture.cjs",
+      "bytes": 22585,
+      "sha256": "03c74de54cc8561ab2d83e0e548b4bc3798c13853bac019ddedad9ccbace683a"
+    },
+    {
+      "path": "apps/desktop/electron/agent-runtime.ts",
+      "bytes": 30212,
+      "sha256": "88fbb5aac5243bfc32e8290950c0ce5f16151ab9ec0ff23cc11ee208ed60d282"
+    },
+    {
+      "path": "apps/desktop/electron/main.ts",
+      "bytes": 29809,
+      "sha256": "378f1c94d688e9881da284eeab04f74a3d7e53b271c03ce6c552aee5ead898f8"
+    },
+    {
+      "path": "apps/desktop/electron/model-config.ts",
+      "bytes": 10928,
+      "sha256": "5e631fdae5e30cb7f4bc7241808ebdae81175b16bb70e54a2ce98a8d18587422"
+    },
+    {
+      "path": "apps/desktop/electron/preload.ts",
+      "bytes": 6278,
+      "sha256": "0d3eec8d271acb9bbc7d1de6dc48e85e226bff1df4895f9be84c471776a1f3ad"
+    },
+    {
+      "path": "apps/desktop/electron/screen-capture.ts",
+      "bytes": 5301,
+      "sha256": "567f3f698df9ed31adb0a566792b38468be217192f0e61c21fc214eaeabc32ab"
+    },
+    {
+      "path": "apps/desktop/electron/screen-tool.ts",
+      "bytes": 1778,
+      "sha256": "ae77beb03c4cf105b9e6101d14f15f0c287c36cc1e8e011ced584070eb32b7c6"
+    },
+    {
+      "path": "apps/desktop/electron/window-layout.ts",
+      "bytes": 5684,
+      "sha256": "ea40fe9d8586f56735cbab1ea176cdb3c2464f7082bac05e4c2695d117f57a52"
+    },
+    {
+      "path": "apps/desktop/src/character/CharacterApp.tsx",
+      "bytes": 101,
+      "sha256": "7b0cd2bbb659360e3dc2dbce8f616c96650f854f9c41d955ef16e05f5682879f"
+    },
+    {
+      "path": "apps/desktop/src/character/StudyCharacter.tsx",
+      "bytes": 2018,
+      "sha256": "e0fa330d400d622022c1b44511df9f0f386f5c5bbd154167e281976631dee5e5"
+    },
+    {
+      "path": "apps/desktop/src/character/UnavailableCharacter.tsx",
+      "bytes": 457,
+      "sha256": "e6925a113176cd04f7d67e9160d370d5bf6157d9e8e5fd696f08c68f915d4347"
+    },
+    {
+      "path": "apps/desktop/src/character/character.css",
+      "bytes": 454,
+      "sha256": "1939a586b36beff4f207e636ed017e342e6a3e6abffee0f904179f799e6e99b6"
+    },
+    {
+      "path": "apps/desktop/src/character/grok.d.ts",
+      "bytes": 697,
+      "sha256": "01429245f81d6f7ffa9d48fa149837d5760148ddf8abd088bc9adc6a12cf474e"
+    },
+    {
+      "path": "apps/desktop/src/character/main.tsx",
+      "bytes": 476,
+      "sha256": "7f5d36942b3520b6f5dc7fa51c72d0fa8f9f477442970cef4db0a74de7c50072"
+    },
+    {
+      "path": "apps/desktop/src/character/study-loader.ts",
+      "bytes": 3789,
+      "sha256": "fd7ec12f46459e5c9b15977e6ce51d4617b3d5a1a69936dd452bf8cbba7fd10b"
+    },
+    {
+      "path": "apps/desktop/src/character/study-map.ts",
+      "bytes": 378,
+      "sha256": "baa0c40fc68484e5acd493cd9b98ea87a5b790e18f67e2dd1cda43c2e671ceec"
+    },
+    {
+      "path": "apps/desktop/src/character/types.ts",
+      "bytes": 995,
+      "sha256": "a7667dd36bc55e2f9608dd2766a5b4a48e8c8689fd4639acf27dd6d71a25c6f1"
+    },
+    {
+      "path": "apps/desktop/src/demo/AgentConversation.tsx",
+      "bytes": 10856,
+      "sha256": "1f44dc40fcfe0d931e3f4de1edb0384d4d6e672a0fa54eeee880deef24a203c4"
+    },
+    {
+      "path": "apps/desktop/src/demo/CompanionCharacter.tsx",
+      "bytes": 704,
+      "sha256": "322a520bf91c4c2a0e0aac798ec5287db85e2b42b17939cea07fcf87dc83fe79"
+    },
+    {
+      "path": "apps/desktop/src/demo/DemoApp.tsx",
+      "bytes": 9590,
+      "sha256": "a03ee380c355ad085aae4f31a486c70da1f1d50fa073069f9a5c8d9535b83cc5"
+    },
+    {
+      "path": "apps/desktop/src/demo/DemoPanels.tsx",
+      "bytes": 18054,
+      "sha256": "7e5f8718194197872010996019bb84c42ad850d56fac30664816f8274bbded12"
+    },
+    {
+      "path": "apps/desktop/src/demo/DisplaySettings.tsx",
+      "bytes": 2229,
+      "sha256": "f8b9a415c2414fb7150df674fade666a183dc988bff61f494b91920e680bc00e"
+    },
+    {
+      "path": "apps/desktop/src/demo/FeaturePanel.tsx",
+      "bytes": 25185,
+      "sha256": "1a8e6e04d554659e5dcd943ce2b3ff88d05dc2cb85d400fe6663eb62a7e059b1"
+    },
+    {
+      "path": "apps/desktop/src/demo/Icon.tsx",
+      "bytes": 1828,
+      "sha256": "98251432b4c4726c82aaa57beb44a8faf288e1a92fd6f161e5a5e1cbda06c747"
+    },
+    {
+      "path": "apps/desktop/src/demo/MessageContent.tsx",
+      "bytes": 5124,
+      "sha256": "fa0b66badd386525323afd17a64dbce0349ba0035488c49bc5055422f9b248f6"
+    },
+    {
+      "path": "apps/desktop/src/demo/ModelSettings.tsx",
+      "bytes": 14287,
+      "sha256": "db495122f01631d274bfb463476c37cb3eba3fa1c6493809992d1ede81b3b83a"
+    },
+    {
+      "path": "apps/desktop/src/demo/ScreenCanvas.tsx",
+      "bytes": 4951,
+      "sha256": "6e0535edf02631b2e1b6a2b8f789cde935b4ed318de4b965c6aef37e3908bc40"
+    },
+    {
+      "path": "apps/desktop/src/demo/TaskCanvas.tsx",
+      "bytes": 33554,
+      "sha256": "bae8210e1a68ef388cb001452b515c73490c6f9aec0b9e22450027038d997486"
+    },
+    {
+      "path": "apps/desktop/src/demo/demo.css",
+      "bytes": 34849,
+      "sha256": "9b705b86dde3a2f953cb32874e7371baed9f6b2844b94f184217bf0c6fb2922d"
+    },
+    {
+      "path": "apps/desktop/src/demo/desktop.d.ts",
+      "bytes": 3160,
+      "sha256": "b6c633d56d3a105560f50151163d2fa8ebcd2a24b85863ab5e450085e03a2a9c"
+    },
+    {
+      "path": "apps/desktop/src/demo/intent.ts",
+      "bytes": 8987,
+      "sha256": "9596b1aa77436c5755a729639ab8fb264f28013f9a4d8f80e9a22468cff5a2b9"
+    },
+    {
+      "path": "apps/desktop/src/demo/local-store.ts",
+      "bytes": 13435,
+      "sha256": "75e21caaec48e89ee486ecc8717724578d82b8b9884b2e65415d63359108d894"
+    },
+    {
+      "path": "apps/desktop/src/demo/screen-text.ts",
+      "bytes": 1808,
+      "sha256": "9464ab160db97e573b3b60271faf2298f68ea60187025d9dd0d5cf9a32ffcf71"
+    },
+    {
+      "path": "apps/desktop/src/demo/usePetDrag.ts",
+      "bytes": 2442,
+      "sha256": "741cc8d9f15b308cbbbc39f96539eda9b78e1744de38f20a47749b41d8aadda9"
+    },
+    {
+      "path": "apps/desktop/tsconfig.electron.json",
+      "bytes": 312,
+      "sha256": "d9c0945af322e5cfce1c1dd05ea212d8143d8fa3b858e1dfa799351115016581"
+    },
+    {
+      "path": "apps/desktop/tsconfig.json",
+      "bytes": 294,
+      "sha256": "df53d717d1c875782113574b2a82d2f6689999cf18569d1bfde0b5cd20c3ffe6"
+    },
+    {
+      "path": "apps/desktop/vite.config.mts",
+      "bytes": 3739,
+      "sha256": "ab9fb7e3015b3a5cc7fa61d4acb078006331438d61f42dda3e9a0ebd16de49d3"
+    },
+    {
+      "path": "build.cmd",
+      "bytes": 976,
+      "sha256": "c03bd8910e523eb22072d5b28fd18861428a4ca6769ffa6a76ff1a06a3d98933"
+    },
+    {
+      "path": "dev.cmd",
+      "bytes": 875,
+      "sha256": "19db8bfb0d63a7c5b9188bfe804138a4a00026a85998872d60daca11612363e0"
+    },
+    {
+      "path": "docs/00-plan-and-acceptance.md",
+      "bytes": 5995,
+      "sha256": "edb82e7a0319c1a3b8bc1209ba329233abb598e6820385a107036414d3d0bcd7"
+    },
+    {
+      "path": "docs/01-desktop-companion.md",
+      "bytes": 28918,
+      "sha256": "bd1aace99c7f99bdda58c7f02ee8993b827b8495ec624b21998b3c115c3ce9ce"
+    },
+    {
+      "path": "docs/02-product-references.md",
+      "bytes": 9042,
+      "sha256": "a2a04baa29524d91b8710695528da5067570d106d51f843f5cd806c87fc98a57"
+    },
+    {
+      "path": "docs/03-frontend-tasks.md",
+      "bytes": 25669,
+      "sha256": "2dcfc25226e4657f1180d5e9a3ee0d5774e539c4407a79879505c99000a38f89"
+    },
+    {
+      "path": "docs/04-dot-demo.md",
+      "bytes": 7289,
+      "sha256": "f827f74fc98e380c4b443417a1a62285f14de83c5879f13938ea14a365cbaa75"
+    },
+    {
+      "path": "docs/05-session-summary-2026-10-20.md",
+      "bytes": 10737,
+      "sha256": "9322411893dbda5a18597674d4042052ab89ad3200fab94b393fa2144c73181a"
+    },
+    {
+      "path": "docs/06-v0.2-implementation.md",
+      "bytes": 12541,
+      "sha256": "f47faed936efaf71ea581e14f9348d03db3476a1259338884bcb78e80fe278d2"
+    },
+    {
+      "path": "docs/07-public-submission.md",
+      "bytes": 2139,
+      "sha256": "b3ddbf47dcf4b729d07f275f2906807e17deaa68683dbcc1939a4a7fdc768301"
+    },
+    {
+      "path": "docs/08-life-demo-and-black-character.md",
+      "bytes": 1554,
+      "sha256": "dfb7de58d56253d97c357fc72cdebf329e7d271a649f525e2a423d7f9c8f93e8"
+    },
+    {
+      "path": "docs/archive/00-plan-v0.1.md",
+      "bytes": 26334,
+      "sha256": "8dbfcc2b639d0804777eeb81491707a0f2e818903005b238250d6d72fcfc26a2"
+    },
+    {
+      "path": "docs/third-party.md",
+      "bytes": 5247,
+      "sha256": "6a16e1e727685181b58b62a94ca30930a7f49874571ac7f3afde1569bedeff97"
+    },
+    {
+      "path": "package-lock.json",
+      "bytes": 34421,
+      "sha256": "2579b164b9cc8a696be11c94a1347a875d96ffc27d583d0d22ee22bb26e13e35"
+    },
+    {
+      "path": "package.json",
+      "bytes": 2089,
+      "sha256": "9cb977a3e372190c248f2f78569cb243c6652f2a0bc3ec0d322e31e7c8c81d2c"
+    },
+    {
+      "path": "scripts/README-LOCAL-WINDOWS.txt",
+      "bytes": 1190,
+      "sha256": "47c81c2cebca1850a3ff9e2a866768c7e48f76068feeac4547c9bdfeeb3529e1"
+    },
+    {
+      "path": "scripts/agent-ui-fixture.mjs",
+      "bytes": 2499,
+      "sha256": "20b49b4f8348d93ecaad7b2fce671a4cd96060277bea25eefec529c978a09163"
+    },
+    {
+      "path": "scripts/check-local-character.cjs",
+      "bytes": 2578,
+      "sha256": "f81ab37c7887bd7c1477e539b9b67c131d1cc39e8fd5251fef8b08c78e4005c7"
+    },
+    {
+      "path": "scripts/check-no-vendor.mjs",
+      "bytes": 2170,
+      "sha256": "10a9e507d8dbfd5d3bd2c76cd606f5bd8271db055eb237692e6681e4d85bf8b8"
+    },
+    {
+      "path": "scripts/dev.mjs",
+      "bytes": 5626,
+      "sha256": "34acc5904abea9a010b4603a0b83e52262dfe5b6218683a832430bd3bca6cc6f"
+    },
+    {
+      "path": "scripts/local-character.mjs",
+      "bytes": 1774,
+      "sha256": "6194134b82a66057cfc40cd5d1bc61a0d7239113030fa8ce9a5a06f347d8d810"
+    },
+    {
+      "path": "scripts/package-demo.mjs",
+      "bytes": 8717,
+      "sha256": "168479193d908a7aeb405a43ba4de285ccdd5ea8a4c85bbc7f0bbac69eabe3d3"
+    },
+    {
+      "path": "scripts/package-local.mjs",
+      "bytes": 12339,
+      "sha256": "f1dbbb637eebc375c8a9cbc9ea715ca01ba24b94f21fd8a0fd26a80eb3e9531a"
+    },
+    {
+      "path": "scripts/test-intent.mjs",
+      "bytes": 6632,
+      "sha256": "11b1d611821cad48e109768e57ac6c4d2dbc1a81a99601c722fa6a0f0fb3a27f"
+    },
+    {
+      "path": "scripts/test-window-layout.mjs",
+      "bytes": 6592,
+      "sha256": "c9550b9d286b57843c00444447fbbe4845c136fe72ae2b23d3fd85dcc2322054"
+    },
+    {
+      "path": "scripts/validate-desktop.mjs",
+      "bytes": 23739,
+      "sha256": "28ab5bf703c4bdef10ccfe6bda5499d21595929f9f294bc2b3480460d993638c"
+    },
+    {
+      "path": "tsconfig.base.json",
+      "bytes": 391,
+      "sha256": "482ef036cff01d1a66e0cd1e49dd146b3d427842306632679e23c054877622e6"
+    },
+    {
+      "path": "公开构建说明.txt",
+      "bytes": 3006,
+      "sha256": "c79eab5c78991f476d1be0a5b35230e8f809aeaf61c1b150d4f074376cb13afe"
+    }
+  ]
+}

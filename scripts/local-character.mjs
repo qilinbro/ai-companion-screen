@@ -11,8 +11,7 @@ const require = createRequire(import.meta.url);
 const files = ['geometry-data.js', 'src/math.js', 'src/tables.js', 'src/pose.js', 'src/tricks.js', 'src/fx.js', 'src/eyes.js', 'src/character.js'];
 const missing = files.filter((file) => !fs.existsSync(path.join(root, 'vendor/grok-study/replica', file)));
 if (missing.length) {
-  console.error('[desktop:local] 原角色本机素材不完整，请恢复本机原角色目录后重试。');
-  process.exit(1);
+  console.warn('[desktop:local] 原角色本机素材不完整，界面将显示加载提示；恢复素材后重启即可。');
 }
 if (!fs.existsSync(path.join(root, 'apps/desktop/dist-local/character.html'))) {
   console.error('[desktop:local] 请先运行 npm run desktop:local:build。');

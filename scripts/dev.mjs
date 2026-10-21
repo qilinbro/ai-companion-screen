@@ -122,8 +122,7 @@ try {
 
   const hasStudyAssets = fs.existsSync(path.join(root, 'vendor/grok-study/replica/geometry-data.js'))
     && fs.existsSync(path.join(root, 'vendor/grok-study/replica/src/character.js'));
-  const characterMode = process.env.CHARACTER_MODE || (hasStudyAssets ? 'study' : 'original');
-  if (characterMode === 'original') console.log('[desktop:dev] 使用原创角色（本机学习素材不随仓库分发）。');
+  if (!hasStudyAssets) console.log('[desktop:dev] 原角色本机素材缺失，界面将显示加载提示；仍可展开输入。');
   console.log(`[desktop:dev] 启动角色窗口（state=${state}）…`);
   electronProcess = spawn(electronPath, [mainEntry], {
     cwd: root,
@@ -132,7 +131,7 @@ try {
       ...process.env,
       VITE_DEV_SERVER_URL: devUrl,
       CHARACTER_STATE: state,
-      CHARACTER_MODE: characterMode,
+      CHARACTER_MODE: 'study',
       COMPANION_USER_DATA_DIR: process.env.COMPANION_USER_DATA_DIR ?? path.join(root, 'outputs', 'local-study-profile'),
     },
   });

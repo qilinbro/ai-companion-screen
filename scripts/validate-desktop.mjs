@@ -158,7 +158,7 @@ try {
   await ui("window.companion.setMode('canvas')"); assert.equal(report.fixture.requests, before); assert((await text()).includes('受控服务已收到')); check('position changes preserve replies and do not resend');
   await send('受控测试 STOP'); await until(() => ui("document.querySelector('.agent-answer') && document.body.innerText.includes('正在输出受控测试文字')"), 'streamed text');
   await button('停止回复'); const stopped = await text(); await sleep(1900); assert.equal(await text(), stopped); assert(!stopped.includes('迟到文字不应出现-LATE')); check('stop isolates late data');
-  assert.equal(await ui("document.querySelector('.character-study, .dot-pet')?.dataset.animationState"), 'idle'); check('stop immediately restores idle character');
+  assert.equal(await ui("document.querySelector('.character-study, .character-unavailable')?.dataset.animationState"), 'idle'); check('stop immediately restores idle character');
   await send('受控测试 HTTP401'); await idle(); assert((await text()).includes('401')); check('authentication failure ends');
   await send('受控测试 BADFORMAT'); await idle(); assert(await ui("!!document.querySelector('.agent-error')")); check('invalid response ends');
   await send('受控测试 DISCONNECT'); await idle(); check('network interruption ends');

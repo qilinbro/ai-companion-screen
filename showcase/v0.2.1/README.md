@@ -1,6 +1,8 @@
 # 伴屏 v0.2.1 公开展示材料
 
-Windows 桌面软件作品 · 2026-10-21
+Windows 桌面软件作品 · 2026-10-21 较早历史快照
+
+当前角色已统一原黑色角色，最新源码见[统一更新](../black-character-update-2026-10-21/README.md)。本目录压缩包保留当时状态，不代表当前角色代码。
 
 - [下载完整材料包](banping-v0.2.1-public-submission.zip)（约 2.7 MB） / [SHA256](banping-v0.2.1-public-submission.zip.sha256)
 - [六页作品说明 PDF](materials/01-作品说明/伴屏-作品展示说明.pdf)

@@ -1,34 +1,27 @@
-﻿伴屏 AI Companion Screen v0.2.1｜公开源码构建说明
-2026-10-21 · 此文件解释公开提交版与本机专用角色版的区别。
+﻿伴屏 AI Companion Screen v0.2.1｜统一原黑色角色后的公开源码
+整理日期：2026-10-21（Asia/Shanghai）
 
-本 ZIP 是现有工程白名单源码快照，包含本项目自行编写的可选本机角色加载胶水；不包含 vendor、第三方原角色的引擎/几何/图像、本机 NOTICE.local、用户配置、密钥、原始屏幕截图、node_modules、任何 dist 或 outputs。没有用可公开读取等同于获准分发。
-README 及历史 docs 中提及的本机原角色路径、快捷方式和 outputs/伴屏-win32-x64 并不随此源码包提供。项目自有开源许可证尚未选定；此公开提交源码不表示向第三方原角色授予任何权利。依赖及引用见 docs/third-party.md。
+这是当前工程的白名单源码快照。本机继续使用原黑色角色与原动画，奶油色 DotPet、OriginalCharacter 及对应样式已移除，缺少素材时只提示“原角色未加载”，不自动换成其他造型。
+公开源码不附送原角色。公开生产构建在待机位置显示“原角色未随附／点击输入”的文字入口，仍可展开输入、拖动、配置模型、聊天及使用同机画布/全屏功能。原角色仅限本机学习；请勿为公开构建下载或复制该素材。本项目的可选加载胶水不包含其引擎、几何或图像。
 
-环境：Windows 10/11 x64、Node.js >= 22.12、图形桌面。下列命令均在解压后的工程根目录执行。
+环境：Windows 10/11 x64、Node.js >= 22.12、图形桌面。解压后在工程根目录执行：
+  npm ci --include=dev
+  npm run build
+  npm run desktop:start
+公开构建包括类型检查、Electron 主进程编译、Vite 打包和 check:no-vendor。先单击文字入口，再按需打开设置，填写有权使用的兼容 Chat Completions 服务地址、模型及密钥；程序不提供模型账号或额度。
 
-依赖与开发：
-npm ci --include=dev
-npm run desktop:dev
-普通开发入口在缺少本机学习素材时回退本项目原创角色，可能在开发控制台显示素材加载失败提示；这不影响公开生产构建。不要为消除该提示而下载、复制第三方学习角色。
+需要制作公开 Windows 便携目录时：
+  npm run build
+  node scripts/package-demo.mjs
+输出为 outputs/伴屏-Demo-win32-x64/，入口“伴屏 Demo.exe”。当前公开构建没有附送宠物形象，亦不会切换到奶油角色。此源码包没有附带 EXE；新包仍需在 Windows 上完成独立启动与交互验证，保留整个运行目录及依赖许可证。
 
-公开生产构建与启动：
-npm run build
-npm run desktop:start
-生产构建使用本项目原创角色，排除第三方学习素材及相应加载分支。构建内含类型检查、Electron 主进程编译、Vite 打包和 check:no-vendor。默认不提供模型访问资格或额度，请在设置自行填写有权使用的兼容服务。
+不要将 npm run desktop:package 用于公开分发：它当前指向本机原角色打包流程，需要本机可信素材目录。desktop:local、desktop:local:package、test:local-character、test:local-desktop 及 test:portable 也属于本机流程；它们不为公开源码附送原角色或原 EXE。README 中的本机路径、快捷方式和旧展示 ZIP 不随本包提供；旧 docs 记录按其时间和历史标注阅读，本文件解释当前公开构建入口。
 
-公开便携版本（Windows x64）：
-npm run build
-node scripts/package-demo.mjs
-输出 outputs/伴屏-Demo-win32-x64/，入口为“伴屏 Demo.exe”。这是供需要公开构建时使用的现有脚本说明；本次材料整理没有重新生成或交付旧奶油角色 EXE。分享时保留整个运行目录及依赖许可证；没有安装器或代码签名。
+可复现检查（本次打源码包未重新运行）：
+  npm run build
+  npm run test:runtime
+  npm run test:layout
+  npm run test:desktop
+现有记录为 41 项运行时、11 项几何模拟；Windows 原生链路采用本机受控兼容服务。历史 30 项本机 EXE 检查含原角色专用断言，不等于当前公开文字入口包验收。受控回复不是实际模型回答，真实视觉服务/型号、实体双屏、混合缩放、拔插与部分人工回归仍待验收。语音、终端执行和跨设备协作尚未实现。
 
-特别注意：npm run desktop:package 当前别名指向本机原角色打包流程，并非公开打包入口。源码包不含该流程必需的角色目录；desktop:local、desktop:local:package、test:local-character、test:local-desktop 也属于本机角色专用流程。请使用上面的公开生产/便携命令。
-test:portable 当前也指向本机专用角色模式，不能当作新公开包验证命令。可先运行 npm run test:desktop 检查公开生产入口；公开便携程序需单独完成启动和交互验证后再形成新证据。
-
-可复现自动化：
-npm run build
-node apps/desktop/electron/agent-runtime.fixture.cjs
-node scripts/test-window-layout.mjs
-npm run test:desktop
-前两组预期为 41 项运行时和 11 项几何模拟。桌面脚本使用本机受控兼容服务，不代表真实模型。已有 30 项本机 EXE 报告含角色专用检查，见提交包 03-AI实践佐证，不等同于公开角色包的验收。
-
-已实现模型工具循环、同机会话画布切换、全屏和取消；真实视觉服务/型号未提供，真实模型效果、实体双屏、混合缩放和拔插仍待验收。语音、终端执行和跨设备连接尚未实现。
+本包仅含源码/配置/说明，不含 vendor、第三方原角色、本机 NOTICE.local、任何 outputs 或 dist、node_modules、个人配置、密钥、会话、原始屏幕图片及本机角色媒体。密钥由主进程管理并可选系统安全存储，截图与对话默认只在内存。项目自身尚未选择开源许可证；公开提交源码不表示授予第三方角色权利，依赖记录见 docs/third-party.md。

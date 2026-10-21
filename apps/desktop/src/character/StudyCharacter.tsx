@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { OriginalCharacter } from './OriginalCharacter';
+import { UnavailableCharacter } from './UnavailableCharacter';
 import { mountStudyCharacter } from './study-loader';
 import { CHARACTER_LABELS, type CharacterHandle, type CharacterState } from './types';
 
@@ -27,10 +27,10 @@ export function StudyCharacter({ state, reducedMotion = false }: { state: Charac
         handle.setState(stateRef.current);
         handle.setPaused(document.hidden);
       })
-      .catch((error: unknown) => {
+      .catch(() => {
         if (cancelled) return;
-        console.error('[character] 学习占位加载失败，回退原创占位。', error);
-        if (!cancelled) setFailed(true);
+        console.warn('[character] 原角色未加载，请检查本机角色素材后重启。');
+        setFailed(true);
       });
 
     const onVisibility = (): void => handleRef.current?.setPaused(document.hidden);
@@ -49,7 +49,7 @@ export function StudyCharacter({ state, reducedMotion = false }: { state: Charac
     if (!failed) handleRef.current?.setState(state);
   }, [state, failed]);
 
-  if (failed) return <OriginalCharacter state={state} />;
+  if (failed) return <UnavailableCharacter state={state} />;
 
   return (
     <svg

@@ -1,0 +1,126 @@
+{
+  "作品": "伴屏 AI Companion Screen",
+  "日期": "2026-10-21",
+  "验证对象": "已更新 dist-local 的现有 Windows Electron EXE",
+  "范围": "隔离资料目录，仅窄范围角色加载和入口验证；不读取用户配置，不访问模型，不读屏。",
+  "原角色素材": "只从现有本机目录加载；未删改或复制素材。仅本机学习预览，不公开分发。",
+  "结果": "通过",
+  "检查": [
+    {
+      "项目": "独立的已打包桌面进程",
+      "通过": true,
+      "数据": {
+        "isPackaged": true,
+        "electron": "44.9.1"
+      }
+    },
+    {
+      "项目": "idle 状态原角色可见",
+      "通过": true,
+      "数据": {
+        "originalPaths": 9
+      }
+    },
+    {
+      "项目": "idle 状态没有旧替代角色",
+      "通过": true
+    },
+    {
+      "项目": "input 状态原角色可见",
+      "通过": true,
+      "数据": {
+        "originalPaths": 9
+      }
+    },
+    {
+      "项目": "input 状态没有旧替代角色",
+      "通过": true
+    },
+    {
+      "项目": "canvas 状态原角色可见",
+      "通过": true,
+      "数据": {
+        "originalPaths": 9
+      }
+    },
+    {
+      "项目": "canvas 状态没有旧替代角色",
+      "通过": true
+    },
+    {
+      "项目": "素材失败时明确显示原角色未加载",
+      "通过": true
+    },
+    {
+      "项目": "素材失败时不切换到旧替代角色",
+      "通过": true
+    },
+    {
+      "项目": "原角色失败提示仍可点击展开输入",
+      "通过": true
+    },
+    {
+      "项目": "解除隔离拦截并重载后恢复原角色",
+      "通过": true
+    }
+  ],
+  "正常状态": [
+    {
+      "mode": "idle",
+      "originalPaths": 9,
+      "obsoleteCharacters": 0,
+      "homeVisible": true,
+      "unavailableText": "",
+      "inputVisible": false
+    },
+    {
+      "mode": "input",
+      "originalPaths": 9,
+      "obsoleteCharacters": 0,
+      "homeVisible": true,
+      "unavailableText": "",
+      "inputVisible": true
+    },
+    {
+      "mode": "canvas",
+      "originalPaths": 9,
+      "obsoleteCharacters": 0,
+      "homeVisible": true,
+      "unavailableText": "",
+      "inputVisible": true
+    }
+  ],
+  "失败模拟": {
+    "方法": "隔离渲染进程通过 CDP Network.setBlockedURLs 阻止 geometry-data.js 后重新加载；未删改原素材。",
+    "加载失败状态": {
+      "mode": "idle",
+      "originalPaths": 0,
+      "obsoleteCharacters": 0,
+      "homeVisible": true,
+      "unavailableText": "原角色未加载\n点击输入",
+      "inputVisible": false
+    },
+    "点击后": {
+      "mode": "input",
+      "originalPaths": 0,
+      "obsoleteCharacters": 0,
+      "homeVisible": true,
+      "unavailableText": "原角色未加载\n点击输入",
+      "inputVisible": true
+    },
+    "解除拦截后": {
+      "mode": "input",
+      "originalPaths": 9,
+      "obsoleteCharacters": 0,
+      "homeVisible": true,
+      "unavailableText": "",
+      "inputVisible": true
+    }
+  },
+  "已修改生产代码": false,
+  "已上传": false,
+  "通过项目数": 11,
+  "模型请求数": 0,
+  "主屏采集数": 0,
+  "用户原进程未操作": true
+}
