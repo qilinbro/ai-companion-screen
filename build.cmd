@@ -21,7 +21,7 @@ if not exist "node_modules\electron\dist\electron.exe" (
   )
 )
 
-echo [INFO] Building Banping Demo...
+echo [INFO] Building Banping ^(original black character^) ...
 call npm run build
 if errorlevel 1 (
   echo.
@@ -30,8 +30,8 @@ if errorlevel 1 (
   exit /b 1
 )
 
-echo [INFO] Starting the built demo ^(original character, no study placeholder^)...
-echo [INFO] Click the companion to open its demo canvas. Press Ctrl+Q to quit.
+echo [INFO] Starting the original black character desktop app...
+echo [INFO] Click the companion to chat; send a request to open the canvas. Quit from the system tray.
 call npm run desktop:start
 if errorlevel 1 (
   echo.

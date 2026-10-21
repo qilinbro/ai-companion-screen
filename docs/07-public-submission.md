@@ -10,4 +10,4 @@
 
 运行时 41 项和几何 11 项在本次材料整理中重新执行；既有本机 EXE 30 项记录另附脱敏报告，角色相关检查属于本机版本，不等同于公开构建验收。真实视觉服务及型号未提供；真实模型效果、实体双屏、混合缩放、拔插和部分人工生命周期回归仍待验收。
 
-公开源码入口为 `npm run build`，公开便携封装入口为 `node scripts/package-demo.mjs`；本轮仅提供可复现源码，不重新生成用户已删除的旧公开角色 EXE。修正公开封装脚本，让其读取 `README-PUBLIC-WINDOWS.txt`，避免误附本机角色版说明。默认 `desktop:package` 仍用于用户当前本机版本。
+当前公开源码校验入口为 `npm run build:public`，校验页面启动入口为 `npm run desktop:public:start`，公开便携封装入口为 `npm run desktop:public:package`；本轮仅提供可复现源码，不重新生成用户已删除的旧公开角色 EXE。公开封装脚本读取 `README-PUBLIC-WINDOWS.txt`，避免误附本机角色版说明。默认 `build`、`desktop:start`、`desktop:package` 和 `build.cmd` 均用于原黑色成品。

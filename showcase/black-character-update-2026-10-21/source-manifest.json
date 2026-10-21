@@ -1,13 +1,14 @@
 {
-  "created_at": "2026-10-21T18:44:00+08:00",
+  "created_at": "2026-10-21T18:57:50+08:00",
   "source_version": "0.2.1",
   "archive": "伴屏-统一黑色角色-公开源码.zip",
-  "archive_bytes": 220228,
-  "archive_sha256": "0abdb0eb7cf2a748e8520021f0d444e5f1e6c5216e4f76e96f56d2aec63b185c",
+  "archive_bytes": 221323,
+  "archive_sha256": "db7bc5d5a72950f28f495af013edb29e5a960a31bf1fec42372944c2a652e37a",
   "entry_count": 71,
   "checks": {
     "same_prior_allowlist": "passed",
     "current_source_snapshot_complete": "passed",
+    "default_local_and_explicit_public_commands": "passed",
     "source_unchanged_during_packaging": "passed",
     "prior_manifest_delta": {
       "removed": [
@@ -47,13 +48,13 @@
     },
     {
       "path": "AGENTS.md",
-      "bytes": 5784,
-      "sha256": "6b695b612a10af27a597299a078bf217a21993b8962a12d8906e0e65f066ba69"
+      "bytes": 6061,
+      "sha256": "487550db401607b8df6e76ab5437ba3b6fe3593f0bcdf64ae9d52a4385ca4b82"
     },
     {
       "path": "README-PUBLIC-WINDOWS.txt",
-      "bytes": 1870,
-      "sha256": "55334e7893f71d95532a2f67fb7d5abe09c8ea536af68e8555763cb61824dfac"
+      "bytes": 2107,
+      "sha256": "66195d13073d2f5b9a309a87e225b0e3cd799253601d91bd88b917a27083c381"
     },
     {
       "path": "README-WINDOWS.txt",
@@ -62,8 +63,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 5735,
-      "sha256": "408bf0fbd1e9aa18383affaf2ebded0522a847e6360011c663bd4882f53200e5"
+      "bytes": 6138,
+      "sha256": "a60b569485162574279315aa5aff32f11f738ca55976f48ae516e27e78346e2c"
     },
     {
       "path": "apps/desktop/character.html",
@@ -257,8 +258,8 @@
     },
     {
       "path": "build.cmd",
-      "bytes": 976,
-      "sha256": "c03bd8910e523eb22072d5b28fd18861428a4ca6769ffa6a76ff1a06a3d98933"
+      "bytes": 1006,
+      "sha256": "9a3ce7383fd2930bd0796c5550b5b842e8bb3c6a9ecaf96e53a40fb954b554ab"
     },
     {
       "path": "dev.cmd",
@@ -297,18 +298,18 @@
     },
     {
       "path": "docs/06-v0.2-implementation.md",
-      "bytes": 12541,
-      "sha256": "f47faed936efaf71ea581e14f9348d03db3476a1259338884bcb78e80fe278d2"
+      "bytes": 13005,
+      "sha256": "7b920d62b451106bc6ee8d04f7faed99e0c47483c749f879365a815a19d272fb"
     },
     {
       "path": "docs/07-public-submission.md",
-      "bytes": 2139,
-      "sha256": "b3ddbf47dcf4b729d07f275f2906807e17deaa68683dbcc1939a4a7fdc768301"
+      "bytes": 2240,
+      "sha256": "5fdf6000cbbdfba8ab7833bff9797e5e1b1ce8f68286dbf25f9d2a4af621a2c8"
     },
     {
       "path": "docs/08-life-demo-and-black-character.md",
-      "bytes": 1554,
-      "sha256": "dfb7de58d56253d97c357fc72cdebf329e7d271a649f525e2a423d7f9c8f93e8"
+      "bytes": 1987,
+      "sha256": "e27105111c0a8daca7bf634788e13930e01dbdb56fd6c045400a151215d6db91"
     },
     {
       "path": "docs/archive/00-plan-v0.1.md",
@@ -327,8 +328,8 @@
     },
     {
       "path": "package.json",
-      "bytes": 2089,
-      "sha256": "9cb977a3e372190c248f2f78569cb243c6652f2a0bc3ec0d322e31e7c8c81d2c"
+      "bytes": 2461,
+      "sha256": "ee41c5ab207a5c12facb9398deedf82aa38422ee8491886258f857197c148c28"
     },
     {
       "path": "scripts/README-LOCAL-WINDOWS.txt",
@@ -347,8 +348,8 @@
     },
     {
       "path": "scripts/check-no-vendor.mjs",
-      "bytes": 2170,
-      "sha256": "10a9e507d8dbfd5d3bd2c76cd606f5bd8271db055eb237692e6681e4d85bf8b8"
+      "bytes": 2177,
+      "sha256": "5f1e6556208bb5b012deaa614f4280a88397a6f3f204a85e57d5ce07c673f20b"
     },
     {
       "path": "scripts/dev.mjs",
@@ -357,13 +358,13 @@
     },
     {
       "path": "scripts/local-character.mjs",
-      "bytes": 1774,
-      "sha256": "6194134b82a66057cfc40cd5d1bc61a0d7239113030fa8ce9a5a06f347d8d810"
+      "bytes": 1839,
+      "sha256": "060dcac8b5539aa1029439f6c0a293df1f81b585ad727257f9bdb79b40b4c5f1"
     },
     {
       "path": "scripts/package-demo.mjs",
-      "bytes": 8717,
-      "sha256": "168479193d908a7aeb405a43ba4de285ccdd5ea8a4c85bbc7f0bbac69eabe3d3"
+      "bytes": 8781,
+      "sha256": "0dafdd84e53cb241238727168462f752d014a8a9e8c7c332f9a45393054f0717"
     },
     {
       "path": "scripts/package-local.mjs",
@@ -382,8 +383,8 @@
     },
     {
       "path": "scripts/validate-desktop.mjs",
-      "bytes": 23739,
-      "sha256": "28ab5bf703c4bdef10ccfe6bda5499d21595929f9f294bc2b3480460d993638c"
+      "bytes": 23996,
+      "sha256": "155df1c22b4bf2164d0ce3812d1c54515f683bcea81338bb718e926382cf3575"
     },
     {
       "path": "tsconfig.base.json",
@@ -392,8 +393,8 @@
     },
     {
       "path": "公开构建说明.txt",
-      "bytes": 3006,
-      "sha256": "c79eab5c78991f476d1be0a5b35230e8f809aeaf61c1b150d4f074376cb13afe"
+      "bytes": 3240,
+      "sha256": "753bd91674e53b47549a8a3472c78ed403e705d48fdcbdf903af22548e65dedc"
     }
   ]
 }

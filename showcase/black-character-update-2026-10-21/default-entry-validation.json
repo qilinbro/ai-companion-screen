@@ -1,0 +1,58 @@
+{
+  "date": "2026-10-21",
+  "kind": "Default desktop:start launcher; real Electron window; no model or screen capture",
+  "checks": [
+    {
+      "label": "Default build selects black local renderer",
+      "passed": true
+    },
+    {
+      "label": "Default start uses the black finished launcher",
+      "passed": true
+    },
+    {
+      "label": "Default package selects the black local executable",
+      "passed": true
+    },
+    {
+      "label": "Independent profile; current user app was not operated",
+      "passed": true
+    },
+    {
+      "label": "Default launcher loads dist-local finished UI",
+      "passed": true
+    },
+    {
+      "label": "idle displays only the finished black character",
+      "passed": true
+    },
+    {
+      "label": "input displays only the finished black character",
+      "passed": true
+    },
+    {
+      "label": "canvas displays only the finished black character",
+      "passed": true
+    }
+  ],
+  "states": [
+    {
+      "mode": "idle",
+      "paths": 9,
+      "otherRoles": 0
+    },
+    {
+      "mode": "input",
+      "paths": 9,
+      "otherRoles": 0
+    },
+    {
+      "mode": "canvas",
+      "paths": 9,
+      "otherRoles": 0
+    }
+  ],
+  "passed": true,
+  "modelRequests": 0,
+  "screenCaptures": 0
+}

@@ -6,6 +6,7 @@
 - 用户已要求将电脑客户端方案上传至指定 GitHub 仓库；2026-10-20 已批准最小角色窗口 spike，因此新增了 Electron/React 代码与开发依赖。后续开发仍按用户验收范围执行，不把 spike 当产品验收。
 - 第三方学习角色只从本机原目录加载，不提交、不复制进公开构建或打包、不用于提交物；本机专用EXE可按可信清单外部加载。用户最新要求统一原黑色角色，已移除奶油占位及备用造型；公开构建仅保留“原角色未随附”的可操作文字入口，素材缺失时显示加载提示，不自动换宠物。移除清单保留在被忽略的本地声明。
 - 用户本机入口已改为最外层伴屏.lnk / outputs/伴屏-win32-x64/伴屏.exe；desktop:package默认生成原角色本机EXE，直接启动不运行终端或编译。dist-local只构建本项目加载胶水，通过可信部署清单读取原角色目录，不复制素材与用户配置。旧奶油版产物与用户CMD入口已清理。公开构建仍需排除第三方角色，勿重新将奶油色占位当作用户本机角色设计。
+- 默认 build、desktop:build、desktop:start、build.cmd 和 desktop:package 都是原黑色成品入口。公开无素材校验用显式 build:public、desktop:public:build/start/package 与 test:desktop:public；不可再让日常默认启动进入公开无角色页面。
 - 当前实现范围以本次用户确认及 docs/06 为准；docs/01-desktop-companion.md 保留完整产品规划与后续硬验收，docs/archive 的 v0.1 已被替代。旧多场景和资料面板代码不等于当前主入口，勿未经需求恢复大量次要元素。
 - 先做 Windows 电脑常伴 Agent，再延伸到联想平板；保留原始实际跨屏硬验收。Agent 先于语音为待验收顺序提案。
 - 用户后续通过具体文章明确了 OpenAI Dots 参考，见 docs/02-product-references.md；Meta Muse 与已停运的 New Computer Dot 保留为早期历史。公开资料、设计推导、本项目实现分别记录，不混淆同名产品或宣称已接入参考产品服务。

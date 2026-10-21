@@ -5,8 +5,10 @@
 此版本不随附原黑色角色，也不再使用奶油色备用角色；待机位置显示“原角色未随附／点击输入”的文字入口，聊天、设置与画布仍可使用。不含第三方学习角色，也不依赖原角色工作区路径。
 源码构建要求 Windows 10/11 x64 和 Node.js >= 22.12：
   npm ci --include=dev
-  npm run build
+  npm run build:public
   node scripts/package-demo.mjs
+仅从源码启动公开校验页面时运行 npm run desktop:public:start。
+默认 build、desktop:start、desktop:package 和 build.cmd 均为本机原黑色成品入口，请勿用默认命令替代以上公开校验命令。
 本次公开展示材料提供源码，没有重新生成或交付此公开 EXE。
 
 单击文字入口展开输入；按住入口拖动；Ctrl+Alt+Space 唤出。关闭窗口停止任务并收至托盘，从托盘选择退出才完全结束程序。

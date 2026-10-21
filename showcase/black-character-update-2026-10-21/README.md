@@ -3,7 +3,7 @@
 2026-10-21 · 当前主分支已移除奶油色角色及备用造型。
 
 - [最新公开源码快照](banping-black-character-source.zip) / [SHA256](SHA256.txt) / [源码逐文件清单](source-manifest.json)
-- [本机 EXE 11 项角色验证](character-validation.json)
+- [本机 EXE 11 项角色验证](character-validation.json) / [默认启动链 8 项检查](default-entry-validation.json)
 - [实现与生活演示说明](../../docs/08-life-demo-and-black-character.md)
 
 本机开发和已有 EXE 加载用户原黑色角色及原动画。缺少脚本时显示“原角色未加载”；公开构建不附受限角色，显示可点击的文字入口，不自动替换成其他宠物。
@@ -13,3 +13,5 @@
 新制作的奶茶/晚饭/出门清单演示及原角色 GIF 含本机学习角色，仅在本机交付，不上传此仓库。奶茶只是受控偏好确认和点单清单，未接入商家、下单或付款。
 
 源码不含角色素材或媒体，未授予第三方素材分发权。较早 showcase/v0.2.1 的 ZIP 与媒体保留为历史快照，当前源码以本目录及主分支为准。
+
+默认 build、desktop:build、desktop:start、build.cmd 和 desktop:package 已全部指向原黑色成品；成品目录中的旧奶油资源备份已清理。公开源码校验仅使用 build:public、desktop:public:start/package 和 test:desktop:public。

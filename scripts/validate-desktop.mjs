@@ -11,10 +11,12 @@ import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const packaged = process.argv.includes('--packaged');
-const localDesktop = process.argv.includes('--local-desktop');
+const publicBuild = process.argv.includes('--public');
+const localDesktop = !publicBuild;
+if (publicBuild && process.argv.includes('--local-desktop')) throw new Error('Choose either --public or --local-desktop.');
 const reviewOnly = process.argv.includes('--ui-review');
 const keepOpen = process.argv.includes('--keep-open') || reviewOnly;
-const tag = `${localDesktop ? 'local-desktop' : packaged ? 'portable' : 'source'}${reviewOnly ? '-ui' : ''}`;
+const tag = `${localDesktop ? packaged ? 'local-desktop' : 'source-local' : packaged ? 'portable' : 'source'}${reviewOnly ? '-ui' : ''}`;
 const profile = path.join(root, 'outputs', `v02-${tag}-profile-${Date.now()}`);
 const mainPort = packaged ? 19331 : 19321;
 const rendererPort = mainPort + 1;
@@ -88,10 +90,10 @@ async function config(allowScreen) { return ui(`window.companion.saveModelConfig
 try {
   await fs.mkdir(profile, { recursive: true });
   await new Promise((resolve) => fixture.listen(0, '127.0.0.1', resolve));
-  const exe = path.join(root, localDesktop ? 'outputs/伴屏-win32-x64/伴屏.exe' : packaged ? 'outputs/伴屏-Demo-win32-x64/伴屏 Demo.exe' : 'node_modules/electron/dist/electron.exe');
+  const exe = path.join(root, packaged ? localDesktop ? 'outputs/伴屏-win32-x64/伴屏.exe' : 'outputs/伴屏-Demo-win32-x64/伴屏 Demo.exe' : 'node_modules/electron/dist/electron.exe');
   const args = [`--inspect=127.0.0.1:${mainPort}`, `--remote-debugging-port=${rendererPort}`, '--remote-debugging-address=127.0.0.1'];
   if (!packaged) args.push(path.join(root, 'apps/desktop/dist-electron/main.js'));
-  child = spawn(exe, args, { cwd: root, env: { ...process.env, COMPANION_USER_DATA_DIR: profile }, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] });
+  child = spawn(exe, args, { cwd: root, env: { ...process.env, VITE_DEV_SERVER_URL: '', COMPANION_LOCAL_CHARACTER: localDesktop ? '1' : '0', COMPANION_USER_DATA_DIR: profile }, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] });
   let diagnostic = ''; child.stderr.on('data', (chunk) => { diagnostic = (diagnostic + chunk).slice(-4000); });
   main = await connect(mainPort);
   renderer = await connect(rendererPort, (t) => t.type === 'page' && t.url.includes('character.html'));

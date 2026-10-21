@@ -18,7 +18,7 @@ if (!fs.existsSync(path.join(root, 'apps/desktop/dist-local/character.html'))) {
   process.exit(1);
 }
 console.log('[desktop:local] 启动原黑色角色，保留原动作与 v0.2 功能。');
-const child = spawn(require('electron'), [path.join(root, 'apps/desktop/dist-electron/main.js')], {
+const child = spawn(require('electron'), [...process.argv.slice(2), path.join(root, 'apps/desktop/dist-electron/main.js')], {
   cwd: root,
   stdio: 'inherit',
   windowsHide: true,
@@ -27,7 +27,7 @@ const child = spawn(require('electron'), [path.join(root, 'apps/desktop/dist-ele
     VITE_DEV_SERVER_URL: '',
     CHARACTER_MODE: 'study',
     COMPANION_LOCAL_CHARACTER: '1',
-    COMPANION_USER_DATA_DIR: path.join(root, 'outputs/local-study-profile'),
+    COMPANION_USER_DATA_DIR: process.env.COMPANION_USER_DATA_DIR ?? path.join(root, 'outputs/local-study-profile'),
   },
 });
 child.on('error', () => { console.error('[desktop:local] 原角色桌面启动失败。'); process.exitCode = 1; });

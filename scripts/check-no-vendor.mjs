@@ -11,7 +11,7 @@ const textExtensions = new Set(['.js', '.mjs', '.cjs', '.html', '.css', '.svg', 
 const failures = [];
 
 if (!fs.existsSync(distDir)) {
-  failures.push('未找到 apps/desktop/dist，请先执行 npm run desktop:build。');
+  failures.push('未找到 apps/desktop/dist，请先执行 npm run desktop:public:build。');
 } else {
   for (const file of walk(distDir)) {
     if (!textExtensions.has(path.extname(file))) continue;

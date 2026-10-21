@@ -28,10 +28,10 @@ try {
   const rendererFiles = collectBuildFiles(path.join(root, 'apps', 'desktop', 'dist'));
   const mainFiles = collectBuildFiles(path.join(root, 'apps', 'desktop', 'dist-electron'));
   if (!rendererFiles.some((file) => file.relative === 'character.html')) {
-    throw new Error('缺少 character.html，请先运行 npm run build。');
+    throw new Error('缺少 character.html，请先运行 npm run build:public。');
   }
   if (!mainFiles.some((file) => file.relative === 'main.js')) {
-    throw new Error('缺少 dist-electron/main.js，请先运行 npm run build。');
+    throw new Error('缺少 dist-electron/main.js，请先运行 npm run build:public。');
   }
   const modules = moduleNames.map((name) => collectRuntimeModule(name));
   const acceptanceNotes = fs.readFileSync(path.join(root, 'docs', '06-v0.2-implementation.md'), 'utf8');
@@ -62,11 +62,11 @@ try {
   fs.writeFileSync(path.join(outputDir, 'v0.2-实现与验收.md'), acceptanceNotes);
   fs.renameSync(path.join(outputDir, 'electron.exe'), path.join(outputDir, '伴屏 Demo.exe'));
 
-  console.log(`[desktop:package] 已生成便携目录：${outputDir}`);
-  console.log('[desktop:package] 双击「伴屏 Demo.exe」运行；分享时请保留整个目录。');
-  console.log('[desktop:package] 打包完成不代表已通过 Windows 启动和交互验证。');
+  console.log(`[desktop:public:package] 已生成公开无素材便携目录：${outputDir}`);
+  console.log('[desktop:public:package] 双击「伴屏 Demo.exe」运行；分享时请保留整个目录。');
+  console.log('[desktop:public:package] 打包完成不代表已通过 Windows 启动和交互验证。');
 } catch (error) {
-  console.error(`[desktop:package] ${error instanceof Error ? error.message : String(error)}`);
+  console.error(`[desktop:public:package] ${error instanceof Error ? error.message : String(error)}`);
   process.exitCode = 1;
 }
 
@@ -95,7 +95,7 @@ function rejectLinks(directory) {
 }
 
 function collectBuildFiles(directory) {
-  if (!fs.existsSync(directory)) throw new Error(`缺少构建目录 ${path.relative(root, directory)}，请先运行 npm run build。`);
+  if (!fs.existsSync(directory)) throw new Error(`缺少构建目录 ${path.relative(root, directory)}，请先运行 npm run build:public。`);
   const result = [];
   visit(directory);
   return result;
